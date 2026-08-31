@@ -427,7 +427,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
       NORMAL_SCALE: 1.6,
     },
 
-    CLUSTER_OFFSET: { x: 2.9, y: -0.05, z: 0 },
+    CLUSTER_OFFSET: { x: 3.3, y: -0.05, z: 0 },
     CLUSTER_OFFSET_X_MOBILE: 0.2,
     MOBILE_BREAKPOINT_PX: 860,
 
@@ -447,7 +447,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     COIN_IDLE_SPIN_MIN: 0.1,
     COIN_IDLE_SPIN_MAX: 0.32,
 
-    COIN_SPREAD_X_LEFT: 1.8,
+    COIN_SPREAD_X_LEFT: 0.8,
     COIN_SPREAD_X_RIGHT: 3.6,
     COIN_SPREAD_Y: 3.2,
     COIN_SPREAD_Z: 2.7,
@@ -456,8 +456,8 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     LIVE_SEPARATION_ITERATIONS: 4,
     LIVE_SEPARATION_STRENGTH: 0.18,
 
-    LAYOUT_BOUNDS: { xMin: -1.8, xMax: 4.4, yMin: -3.7, yMax: 3.7, zMin: -3.2, zMax: 3.2 },
-    DRAG_BOUNDS: { xMin: -2.9, xMax: 4.6, yMin: -3.9, yMax: 3.9, zMin: -3.5, zMax: 3.5 },
+    LAYOUT_BOUNDS: { xMin: 0.2, xMax: 4.4, yMin: -3.7, yMax: 3.7, zMin: -3.2, zMax: 3.2 },
+    DRAG_BOUNDS: { xMin: -0.4, xMax: 4.6, yMin: -3.9, yMax: 3.9, zMin: -3.5, zMax: 3.5 },
 
     CLUSTER_SPIN_SPEED_Y: 0.07,
     CLUSTER_BASE_TILT_X: 0.06,
@@ -513,9 +513,31 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   var coinsGroup = new THREE.Group();
   cluster.add(coinsGroup);
 
+  // As the viewport narrows below desktop width, the same world-space
+  // clearance covers proportionally fewer screen pixels (the camera's
+  // horizontal FOV shrinks with the narrower aspect), so the cluster needs
+  // to sit further right (and its left-hand bound pulled in) the narrower
+  // the stage gets, or coins start drifting under the copy.
+  var CLEARANCE_W_MIN = 860, CLEARANCE_W_MAX = 1440;
+  function computeClearance(width) {
+    var w = THREE.MathUtils.clamp(width, CLEARANCE_W_MIN, CLEARANCE_W_MAX);
+    var t = (w - CLEARANCE_W_MIN) / (CLEARANCE_W_MAX - CLEARANCE_W_MIN);
+    return {
+      offsetX:   THREE.MathUtils.lerp(4.5, CONFIG.CLUSTER_OFFSET.x, t),
+      layoutXMin: THREE.MathUtils.lerp(1.6, 0.2, t),
+      dragXMin:   THREE.MathUtils.lerp(1.0, -0.4, t),
+    };
+  }
+
   function updateClusterOffsetForViewport() {
     var isMobileLayout = window.innerWidth <= CONFIG.MOBILE_BREAKPOINT_PX;
-    cluster.position.x = isMobileLayout ? CONFIG.CLUSTER_OFFSET_X_MOBILE : CONFIG.CLUSTER_OFFSET.x;
+    if (isMobileLayout) {
+      cluster.position.x = CONFIG.CLUSTER_OFFSET_X_MOBILE;
+      return;
+    }
+    var clearance = computeClearance(window.innerWidth);
+    cluster.position.x = clearance.offsetX;
+    CONFIG.DRAG_BOUNDS.xMin = clearance.dragXMin;
   }
 
   function resize() {
@@ -825,9 +847,16 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
       return { def: def, radius: radius, pos: pos, fixed: false };
     });
 
+    var isMobileLayout = window.innerWidth <= CONFIG.MOBILE_BREAKPOINT_PX;
+    var buildLayoutBounds = CONFIG.LAYOUT_BOUNDS;
+    if (!isMobileLayout) {
+      var clearance = computeClearance(window.innerWidth);
+      buildLayoutBounds = Object.assign({}, CONFIG.LAYOUT_BOUNDS, { xMin: clearance.layoutXMin });
+    }
+
     for (var round = 0; round < 4; round++) {
       separationPass(candidates, CONFIG.INITIAL_SEPARATION_ITERATIONS / 4, CONFIG.MIN_GAP, 1.0);
-      candidates.forEach(function (c) { clampToBounds(c.pos, CONFIG.LAYOUT_BOUNDS); });
+      candidates.forEach(function (c) { clampToBounds(c.pos, buildLayoutBounds); });
     }
 
     var normalScaleVec = new THREE.Vector2(E.NORMAL_SCALE, E.NORMAL_SCALE);
