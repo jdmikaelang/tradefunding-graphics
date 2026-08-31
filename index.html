@@ -109,17 +109,20 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   .mobile-menu-panel .mobile-menu-group-label{display:block;padding-top:16px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(0,28,68,0.4);}
   .tf-mobile-grid{grid-template-columns:1fr !important;}
   .hero-grid{grid-template-columns:1fr !important;}
-  .scene-stage{height:320px !important;}
+  .hero-section{position:relative;overflow:visible;}
+  .scene-stage{position:relative !important;inset:auto !important;height:420px !important;order:-1;}
 }
 
-/* Hero card wheel */
-.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;}
+/* Hero coin scene — full-bleed behind the copy, like the source scene */
+.hero-section{position:relative;overflow:visible;}
+.hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;}
 .hero-grid>div{min-width:0;}
-.scene-stage{position:relative;height:460px;overflow:visible;}
+.hero-stage-wrap{min-width:0;}
+.scene-stage{position:absolute;inset:0;overflow:visible;}
 .scene-stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;}
 .scene-stage canvas.is-dragging{cursor:grabbing;}
 .scene-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(0,28,68,0.45);pointer-events:none;}
-.scene-hint{font-family:'DM Sans',sans-serif;font-size:12.5px;color:rgba(0,28,68,0.4);text-align:center;margin-top:8px;}
+.scene-hint{font-family:'DM Sans',sans-serif;font-size:12.5px;color:rgba(0,28,68,0.4);margin-top:20px;}
 </style>
 </head>
 <body>
@@ -204,18 +207,17 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   </div>
 </header>
 
-<section style="background:#FFFFFF;min-height:85vh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:clamp(96px,10vw,128px) 40px;">
+<section class="hero-section" style="background:#FFFFFF;min-height:85vh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:clamp(96px,10vw,128px) 40px;">
   <div class="hero-grid" style="max-width:1200px;margin:0 auto;width:100%;">
     <div style="text-align:left;">
       <h1 style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:clamp(3rem,5.2vw,5rem);line-height:1.04;letter-spacing:-0.025em;color:#001C44;margin:0 0 20px;">Business capital, from every angle.</h1>
       <p style="font-family:'DM Sans',sans-serif;font-weight:400;font-size:1.15rem;line-height:1.6;color:rgba(0,28,68,0.65);margin:0;">Choose the channel that fits what you need funded</p>
-    </div>
-    <div>
-      <div class="scene-stage" id="scene-stage">
-        <div class="scene-loading" id="scene-loading">Loading…</div>
-      </div>
       <div class="scene-hint" id="scene-hint">Tap a coin to light it up, or flick it to spin</div>
     </div>
+    <div class="hero-stage-wrap"></div>
+  </div>
+  <div class="scene-stage" id="scene-stage">
+    <div class="scene-loading" id="scene-loading">Loading…</div>
   </div>
 </section>
 
@@ -390,8 +392,8 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     },
 
     CAMERA_FOV: 32,
-    CAMERA_POSITION: { x: 0, y: 0.2, z: 9 },
-    CAMERA_LOOKAT:   { x: 0, y: 0, z: 0 },
+    CAMERA_POSITION: { x: 0, y: 0.2, z: 11 },
+    CAMERA_LOOKAT:   { x: 1.15, y: -0.1, z: 0 },
 
     LIGHTS: {
       hemiSkyColor:    0xFFFFFF,
@@ -425,12 +427,14 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
       NORMAL_SCALE: 1.6,
     },
 
-    CLUSTER_OFFSET: { x: 0, y: -0.05, z: 0 },
+    CLUSTER_OFFSET: { x: 2.9, y: -0.05, z: 0 },
+    CLUSTER_OFFSET_X_MOBILE: 0.2,
+    MOBILE_BREAKPOINT_PX: 860,
 
     WORDS: ['PERSONAL', 'PROPERTY', 'COMMERCIAL', 'VENDOR'],
-    COIN_COUNT: 12,
-    COIN_RADIUS_MIN: 0.4,
-    COIN_RADIUS_MAX: 0.68,
+    COIN_COUNT: 16,
+    COIN_RADIUS_MIN: 0.48,
+    COIN_RADIUS_MAX: 0.8,
     COIN_THICKNESS_RATIO: 0.11,
     COIN_SEGMENTS: 56,
 
@@ -443,16 +447,17 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     COIN_IDLE_SPIN_MIN: 0.1,
     COIN_IDLE_SPIN_MAX: 0.32,
 
-    COIN_SPREAD_X: 2.6,
-    COIN_SPREAD_Y: 2.5,
-    COIN_SPREAD_Z: 2.1,
-    MIN_GAP: 0.45,
+    COIN_SPREAD_X_LEFT: 2.3,
+    COIN_SPREAD_X_RIGHT: 3.6,
+    COIN_SPREAD_Y: 3.2,
+    COIN_SPREAD_Z: 2.7,
+    MIN_GAP: 0.5,
     INITIAL_SEPARATION_ITERATIONS: 280,
     LIVE_SEPARATION_ITERATIONS: 4,
     LIVE_SEPARATION_STRENGTH: 0.18,
 
-    LAYOUT_BOUNDS: { xMin: -3.2, xMax: 3.2, yMin: -3.0, yMax: 3.0, zMin: -2.6, zMax: 2.6 },
-    DRAG_BOUNDS: { xMin: -3.6, xMax: 3.6, yMin: -3.3, yMax: 3.3, zMin: -3.0, zMax: 3.0 },
+    LAYOUT_BOUNDS: { xMin: -1.8, xMax: 4.4, yMin: -3.7, yMax: 3.7, zMin: -3.2, zMax: 3.2 },
+    DRAG_BOUNDS: { xMin: -2.9, xMax: 4.6, yMin: -3.9, yMax: 3.9, zMin: -3.5, zMax: 3.5 },
 
     CLUSTER_SPIN_SPEED_Y: 0.07,
     CLUSTER_BASE_TILT_X: 0.06,
@@ -508,12 +513,18 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   var coinsGroup = new THREE.Group();
   cluster.add(coinsGroup);
 
+  function updateClusterOffsetForViewport() {
+    var isMobileLayout = window.innerWidth <= CONFIG.MOBILE_BREAKPOINT_PX;
+    cluster.position.x = isMobileLayout ? CONFIG.CLUSTER_OFFSET_X_MOBILE : CONFIG.CLUSTER_OFFSET.x;
+  }
+
   function resize() {
     var w = stage.clientWidth;
     var h = stage.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    updateClusterOffsetForViewport();
     if (reducedMotion) renderOnce();
   }
   window.addEventListener('resize', resize);
@@ -805,8 +816,9 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
 
     var candidates = deck.map(function (def) {
       var radius = THREE.MathUtils.lerp(CONFIG.COIN_RADIUS_MIN, CONFIG.COIN_RADIUS_MAX, Math.random());
+      var xReach = Math.random() < 0.5 ? -CONFIG.COIN_SPREAD_X_LEFT : CONFIG.COIN_SPREAD_X_RIGHT;
       var pos = new THREE.Vector3(
-        (Math.random() - 0.5) * CONFIG.COIN_SPREAD_X * 2,
+        Math.random() * xReach,
         (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Y * 2,
         (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Z * 2
       );
