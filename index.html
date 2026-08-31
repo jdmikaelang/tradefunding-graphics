@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Funding - Business Capital, From Every Angle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth;}
+body{margin:0;background:#FFFFFF;-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;}
+*{box-sizing:border-box;}
+
+/* Mega menu — full-bleed dark panel, arrow-reveal links */
+.nav-item{position:relative;}
+.mega-panel,.mega-panel-compare{
+  position:fixed;top:80px;left:0;width:100vw;max-width:100vw;
+  background:rgba(255,255,255,0.7);border:none;border-top:1px solid rgba(0,28,68,0.08);border-radius:0;
+  backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+  box-shadow:0 20px 60px rgba(0,28,68,0.24);
+  padding:40px 0 28px;
+  opacity:0;visibility:hidden;transform:translateY(-6px);
+  transition:opacity 0.2s ease,transform 0.2s ease,visibility 0.2s ease;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mega-panel,.mega-panel-compare{background:rgba(255,255,255,0.96);}
+}
+.nav-item:hover .mega-panel,.nav-item:focus-within .mega-panel,
+.nav-item:hover .mega-panel-compare,.nav-item:focus-within .mega-panel-compare{opacity:1;visibility:visible;transform:translateY(0);}
+.mega-wide-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+.mega-wide-lead{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1.05rem;color:#001C44;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(0,28,68,0.08);width:100%;}
+.mega-wide-lead .mega-arrow{transition:transform 0.2s ease;}
+.mega-wide-lead:hover .mega-arrow{transform:translateX(4px);}
+.mega-wide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;}
+.mega-wide-grid.mega-wide-grid-compact{grid-template-columns:repeat(2,minmax(200px,240px));justify-content:start;}
+.mega-wide-group-label{display:block;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:#4A5568;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(0,28,68,0.08);}
+.mega-wide-links{display:flex;flex-direction:column;gap:2px;}
+.mega-wide-link{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:0.9rem;color:rgba(0,28,68,0.72);padding:7px 0;transition:color 0.2s ease;}
+.mega-wide-link .mega-arrow{opacity:0;transform:translateX(-4px);transition:opacity 0.2s ease,transform 0.2s ease;}
+.mega-wide-link:hover{color:#001C44;}
+.mega-wide-link:hover .mega-arrow{opacity:1;transform:translateX(0);}
+.mega-wide-sub{font-family:'DM Sans',sans-serif;font-size:0.82rem;color:#4A5568;margin-top:2px;}
+@media (max-width:900px){
+  .mega-wide-grid,.mega-wide-grid.mega-wide-grid-compact{grid-template-columns:1fr;gap:24px;}
+  .mega-wide-inner{padding:0 20px;}
+}
+
+/* Channel tiles — Square-style hover graphics */
+.channel-eyebrow{
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:0.1em;
+  color:rgba(0,28,68,0.45);
+}
+.sq-tile{display:flex;flex-direction:column;border-radius:16px;overflow:hidden;border:1px solid rgba(0,28,68,0.08);background:#FFFFFF;box-shadow:0 1px 3px rgba(0,28,68,0.05);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1),box-shadow 0.3s cubic-bezier(0.22,1,0.36,1);}
+.sq-tile:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,28,68,0.10);}
+.sq-tile-graphic{position:relative;height:170px;background:#F1F5F9;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;}
+
+.sq-bars{display:flex;align-items:flex-end;gap:10px;height:100px;padding-bottom:24px;}
+.sq-bars div{width:20px;border-radius:4px 4px 0 0;background:#001C44;transition:height 0.6s cubic-bezier(0.22,1,0.36,1);}
+.sq-bars div:nth-child(1){height:30px;}
+.sq-bars div:nth-child(2){height:50px;background:#54B4F6;}
+.sq-bars div:nth-child(3){height:20px;}
+.sq-tile:hover .sq-bars div:nth-child(1){height:55px;}
+.sq-tile:hover .sq-bars div:nth-child(2){height:90px;}
+.sq-tile:hover .sq-bars div:nth-child(3){height:40px;}
+
+.sq-ripple-wrap{position:relative;width:70px;height:70px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;}
+.sq-ripple-core{width:34px;height:34px;border-radius:8px;background:#001C44;position:relative;z-index:2;}
+.sq-ripple-ring{position:absolute;border-radius:8px;border:2px solid #54B4F6;opacity:0;}
+.sq-tile:hover .sq-ripple-ring{animation:sq-ripple 1.4s ease-out infinite;}
+.sq-tile:hover .sq-ripple-ring:nth-child(2){animation-delay:0.4s;}
+@keyframes sq-ripple{0%{width:34px;height:34px;opacity:0.6;}100%{width:74px;height:74px;opacity:0;}}
+
+/* House icon: fully drawn/visible at rest (dashoffset:0) so it never
+   disappears when not hovered — hover just replays the draw-in as a
+   flourish, then the path settles back at its resting (visible) state. */
+.sq-house{margin-bottom:20px;}
+.sq-house path{fill:none;stroke:#001C44;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:220;stroke-dashoffset:0;}
+.sq-tile:hover .sq-house path{animation:sq-house-draw 0.9s ease;}
+@keyframes sq-house-draw{0%{stroke-dashoffset:220;}100%{stroke-dashoffset:0;}}
+
+.sq-tile-body{padding:28px;display:flex;flex-direction:column;gap:10px;flex:1;}
+
+.cta-btn{font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;padding:11px 24px;border-radius:999px;white-space:nowrap;flex-shrink:0;transition:transform 0.2s,box-shadow 0.2s;background:#001C44;color:#FFFFFF;border:2px solid #001C44;box-shadow:0 4px 14px rgba(0,28,68,0.3);display:inline-block;}
+.cta-btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,28,68,0.4);}
+
+.footer-link{font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(255,255,255,0.6);transition:color 0.2s;}
+.footer-link:hover{color:#FFFFFF;}
+
+/* Mobile nav */
+.mobile-menu-btn{display:none;}
+.mobile-menu-panel{display:none;}
+@media (max-width:860px){
+  header nav[aria-label="Primary"]{display:none !important;}
+  header > div{padding-left:24px;padding-right:24px;gap:12px;}
+  .mobile-menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;cursor:pointer;background:none;border:none;padding:0;}
+  .mobile-menu-btn .burger{position:relative;display:block;width:20px;height:2px;background:#001C44;transition:background 0.18s ease;}
+  .mobile-menu-btn .burger::before,.mobile-menu-btn .burger::after{content:'';position:absolute;left:0;width:20px;height:2px;background:#001C44;transition:transform 0.18s ease,top 0.18s ease;}
+  .mobile-menu-btn .burger::before{top:-6px;}
+  .mobile-menu-btn .burger::after{top:6px;}
+  .mobile-menu-btn[aria-expanded="true"] .burger{background:transparent;}
+  .mobile-menu-btn[aria-expanded="true"] .burger::before{top:0;transform:rotate(45deg);}
+  .mobile-menu-btn[aria-expanded="true"] .burger::after{top:0;transform:rotate(-45deg);}
+  .mobile-menu-panel{display:none;flex-direction:column;background:#FFFFFF;border-top:1px solid rgba(0,28,68,0.08);padding:4px 24px 20px;}
+  .mobile-menu-panel.is-open{display:flex;}
+  .mobile-menu-panel a{display:block;padding:14px 0;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;color:rgba(0,28,68,0.85);border-bottom:1px solid rgba(0,28,68,0.06);}
+  .mobile-menu-panel a:last-child{border-bottom:none;}
+  .mobile-menu-panel .mobile-menu-group-label{display:block;padding-top:16px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(0,28,68,0.4);}
+  .tf-mobile-grid{grid-template-columns:1fr !important;}
+  .hero-grid{grid-template-columns:1fr !important;}
+  .scene-stage{height:320px !important;}
+}
+
+/* Hero card wheel */
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;}
+.hero-grid>div{min-width:0;}
+.scene-stage{position:relative;height:460px;overflow:visible;}
+.scene-stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;}
+.scene-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(0,28,68,0.45);pointer-events:none;}
+.scene-hint{font-family:'DM Sans',sans-serif;font-size:12.5px;color:rgba(0,28,68,0.4);text-align:center;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div style="font-family:'DM Sans',sans-serif;color:#001C44;background:#FFFFFF;min-height:100vh;">
+
+<header style="position:sticky;top:0;z-index:60;background:#FFFFFF;border-bottom:1px solid rgba(0,28,68,0.08);">
+  <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+    <a href="index.html" style="flex-shrink:0;display:flex;align-items:center;"><img src="assets/img/logo-navy.png" alt="tradefunding" style="height:22px;width:auto;display:block;"></a>
+
+    <nav aria-label="Primary" style="display:flex;align-items:center;gap:40px;">
+
+      <div class="nav-item">
+        <span aria-haspopup="true" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;color:rgba(0,28,68,0.75);padding:28px 0;">
+          Products
+          <span aria-hidden="true" style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;"></span>
+        </span>
+        <div role="menu" class="mega-panel">
+          <div class="mega-wide-inner">
+            <div class="mega-wide-grid">
+              <div>
+                <a href="commercial.html" class="mega-wide-link" style="font-weight:700;font-size:1rem;">Fund my business<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                <div class="mega-wide-sub">Compare 70+ lenders for term loans, credit lines and asset finance.</div>
+              </div>
+              <div>
+                <a href="connect.html" class="mega-wide-link" style="font-weight:700;font-size:1rem;">Support client payments<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                <div class="mega-wide-sub">The funding market at your point of sale.</div>
+              </div>
+              <div>
+                <a href="personal-and-property.html" class="mega-wide-link" style="font-weight:700;font-size:1rem;">Personal &amp; property<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                <div class="mega-wide-sub">Funding for owners running a business, and the property behind it.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare routes to the dedicated Cashper/Compare Engine page -->
+      <div class="nav-item">
+        <a href="commercial/compare-report/index.html" aria-haspopup="true" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;color:rgba(0,28,68,0.75);padding:28px 0;">
+          Compare
+          <span aria-hidden="true" style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;"></span>
+        </a>
+        <div role="menu" class="mega-panel-compare">
+          <div class="mega-wide-inner">
+            <a href="commercial/compare-report/index.html" class="mega-wide-lead">Compare your options<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+            <div class="mega-wide-grid mega-wide-grid-compact">
+              <div>
+                <span class="mega-wide-group-label">Compare</span>
+                <div class="mega-wide-links">
+                  <a href="commercial/compare-report/index.html" class="mega-wide-link">Compare Report<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                  <a href="commercial/meet-cashper/index.html" class="mega-wide-link">Meet Cashper<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                </div>
+              </div>
+              <div>
+                <span class="mega-wide-group-label">Calculators</span>
+                <div class="mega-wide-links">
+                  <a href="commercial/repayment-calculator/index.html" class="mega-wide-link">Repayment Calculator<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                  <a href="commercial/equipment-calculator/index.html" class="mega-wide-link">Equipment Finance Calculator<span class="mega-arrow" aria-hidden="true">&rarr;</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="home-shared/about/index.html" style="font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;color:rgba(0,28,68,0.75);padding:28px 0;">About</a>
+    </nav>
+
+    <a href="home-shared/contact/index.html" class="cta-btn">Contact</a>
+
+    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenuPanel"><span class="burger"></span></button>
+  </div>
+  <div class="mobile-menu-panel" id="mobileMenuPanel">
+    <span class="mobile-menu-group-label">Products</span>
+    <a href="commercial.html">Fund my business</a>
+    <a href="connect.html">Support client payments</a>
+    <a href="personal-and-property.html">Funding owners running business</a>
+    <span class="mobile-menu-group-label">Compare</span>
+    <a href="commercial/compare-report/index.html">Which Option is Best</a>
+    <a href="home-shared/about/index.html">About</a>
+  </div>
+</header>
+
+<section style="background:#FFFFFF;min-height:85vh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:clamp(96px,10vw,128px) 40px;">
+  <div class="hero-grid" style="max-width:1200px;margin:0 auto;width:100%;">
+    <div style="text-align:left;">
+      <h1 style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:clamp(3rem,5.2vw,5rem);line-height:1.04;letter-spacing:-0.025em;color:#001C44;margin:0 0 20px;">Business capital, from every angle.</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-weight:400;font-size:1.15rem;line-height:1.6;color:rgba(0,28,68,0.65);margin:0;">Choose the channel that fits what you need funded</p>
+    </div>
+    <div>
+      <div class="scene-stage" id="scene-stage">
+        <div class="scene-loading" id="scene-loading">Loading…</div>
+      </div>
+      <div class="scene-hint" id="scene-hint">Drag to spin, or click a card to choose it</div>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Funding channels" style="padding:clamp(96px,8vw,128px) 40px;background:#F8FAFC;">
+  <div style="max-width:1200px;margin:0 auto 48px;text-align:center;">
+    <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(0,28,68,0.45);margin-bottom:14px;">100+ products, three ways in</div>
+    <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:clamp(1.6rem,2.6vw,2.2rem);color:#001C44;">Hover a channel to see it in action</div>
+  </div>
+  <div class="tf-mobile-grid" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+
+    <a href="commercial.html" class="sq-tile">
+      <div class="sq-tile-graphic">
+        <div class="sq-bars"><div></div><div></div><div></div></div>
+      </div>
+      <div class="sq-tile-body">
+        <span class="channel-eyebrow">Commercial</span>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:22px;color:#001C44;">Fund my business</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:rgba(0,28,68,0.6);">Term loans, lines of credit and asset finance, compared side by side.</div>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;color:#001C44;margin-top:auto;padding-top:8px;">Explore →</div>
+      </div>
+    </a>
+
+    <a href="connect.html" class="sq-tile">
+      <div class="sq-tile-graphic">
+        <div class="sq-ripple-wrap">
+          <div class="sq-ripple-ring"></div>
+          <div class="sq-ripple-ring"></div>
+          <div class="sq-ripple-core"></div>
+        </div>
+      </div>
+      <div class="sq-tile-body">
+        <span class="channel-eyebrow">Connect</span>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:22px;color:#001C44;">Funding for my customers</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:rgba(0,28,68,0.6);">Offer finance at checkout so more customers say yes.</div>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;color:#001C44;margin-top:auto;padding-top:8px;">Explore →</div>
+      </div>
+    </a>
+
+    <a href="personal-and-property.html" class="sq-tile">
+      <div class="sq-tile-graphic">
+        <svg class="sq-house" width="72" height="60" viewBox="0 0 72 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 30 L36 6 L66 30 M14 24 V54 H58 V24" />
+        </svg>
+      </div>
+      <div class="sq-tile-body">
+        <span class="channel-eyebrow">Personal and property</span>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:22px;color:#001C44;">Funding owners running business</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:rgba(0,28,68,0.6);">Home loans and property finance for the people behind the business.</div>
+        <div style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;color:#001C44;margin-top:auto;padding-top:8px;">Explore →</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<section style="background:#FFFFFF;padding:clamp(96px,8vw,128px) 40px;">
+  <div class="tf-mobile-grid" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:64px;align-items:stretch;">
+    <div style="text-align:left;">
+      <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(0,28,68,0.45);margin-bottom:20px;">Why we exist</div>
+      <p style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:clamp(1.2rem,1.7vw,1.5rem);line-height:1.6;color:#001C44;margin:0;">Could you review over 100 products to pick which ones you qualify for and are best?</p>
+      <p style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:clamp(1.2rem,1.7vw,1.5rem);line-height:1.6;color:#54B4F6;margin:8px 0 0;">We can.</p>
+      <p style="font-family:'DM Sans',sans-serif;font-weight:400;font-size:15px;line-height:1.9;color:#001C44;margin:32px 0 20px;">Business owners have long been pushed through a single funding channel, regardless of what they actually needed. A commercial loan, a customer financing program, and a personal or property-backed facility are different products, priced and structured differently.</p>
+      <p style="font-family:'DM Sans',sans-serif;font-weight:400;font-size:15px;line-height:1.9;color:#001C44;margin:0;">This directory lays out the channels plainly, with the terms and fit for each made clear up front, so you can see where your business sits before you talk to anyone.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:24px;">
+      <div style="display:flex;align-items:center;gap:24px;padding:32px;border-radius:16px;background:#FFFFFF;border:1px solid rgba(0,28,68,0.08);box-shadow:0 1px 3px rgba(0,28,68,0.08);">
+        <span style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:3.5rem;color:#001C44;line-height:1;">100+</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(0,28,68,0.6);line-height:1.4;">lending products across every channel</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;padding:32px;border-radius:16px;background:#FFFFFF;border:1px solid rgba(0,28,68,0.08);box-shadow:0 1px 3px rgba(0,28,68,0.08);">
+        <span style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:3.5rem;color:#001C44;line-height:1;">1</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(0,28,68,0.6);line-height:1.4;">directory that lays out the fit for each, up front</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#001C44;">
+  <div class="tf-mobile-grid" style="max-width:1200px;margin:0 auto;padding:72px 40px 40px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:48px;">
+
+    <div>
+      <img src="assets/img/logo-white.png" alt="tradefunding" style="height:20px;width:auto;display:block;margin-bottom:16px;">
+      <p style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.7;color:rgba(255,255,255,0.55);margin:0 0 20px;max-width:280px;">Know before you apply. We pre-qualify your business against 70+ lenders and match you with the right offer, then support you all the way to settlement. Free. No credit check. 24 hours.</p>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">
+        <a href="tel:1300161641" style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:rgba(255,255,255,0.75);">1300 161 641</a>
+        <a href="mailto:support@tradefunding.com.au" style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:rgba(255,255,255,0.75);">support@tradefunding.com.au</a>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:rgba(255,255,255,0.55);">Level 8, 387 George Street, Sydney, NSW, 2000</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:4px 10px;">ACL 387856</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:4px 10px;">AFCA Member</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:4px 10px;">CAFBA</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:4px 10px;">Fintech Australia</span>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;color:#FFFFFF;margin-bottom:18px;">Channels</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <a href="commercial.html" class="footer-link">Business Loans</a>
+        <a href="connect.html" class="footer-link">Connect</a>
+        <a href="personal-and-property.html" class="footer-link">Personal &amp; Property</a>
+        <a class="footer-link" href="commercial/guides/index.html">Guides &amp; Tools</a>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;color:#FFFFFF;margin-bottom:18px;">Company</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <a href="home-shared/about/index.html" class="footer-link">About Us</a>
+        <a href="home-shared/broker-portal/index.html" class="footer-link">Broker Portal</a>
+        <a href="connect.html" class="footer-link">Become a Partner</a>
+        <a href="home-shared/contact/index.html" class="footer-link">Contact</a>
+        <a href="home-shared/apply/index.html" class="footer-link">Get Started</a>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;color:#FFFFFF;margin-bottom:18px;">Legal</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <a href="home-shared/credit-guide/index.html" class="footer-link">Credit Guide</a>
+        <a href="home-shared/privacy/index.html" class="footer-link">Privacy Policy</a>
+        <a href="home-shared/terms/index.html" class="footer-link">Terms &amp; Conditions</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:24px 40px 32px;border-top:1px solid rgba(255,255,255,0.15);display:flex;flex-direction:column;gap:10px;">
+    <p style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.6;color:rgba(255,255,255,0.45);margin:0;">Credit products are provided by third-party lenders and credit offers are subject to a full credit review. Read our <a href="home-shared/credit-guide/index.html" style="color:rgba(255,255,255,0.65);">Credit Guide</a> | <a href="home-shared/terms/index.html" style="color:rgba(255,255,255,0.65);">Terms &amp; Conditions</a> | ACL 387856</p>
+    <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(255,255,255,0.4);margin:0;">© 2026 Trade Funding Pty Ltd. All rights reserved.</p>
+  </div>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var btn=document.getElementById('mobileMenuBtn');
+  var panel=document.getElementById('mobileMenuPanel');
+  if(!btn||!panel)return;
+  btn.addEventListener('click',function(){
+    var open=panel.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded',String(open));
+  });
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var NAVY = 0x001C44;
+  var BLUE = 0x54B4F6;
+
+  var PRODUCTS = [
+    { label: "Term loan", channel: "Commercial" },
+    { label: "Line of credit", channel: "Commercial" },
+    { label: "Equipment finance", channel: "Commercial" },
+    { label: "Vendor finance", channel: "Connect" },
+    { label: "Point-of-sale finance", channel: "Connect" },
+    { label: "Home loan", channel: "Personal & Property" },
+    { label: "Property finance", channel: "Personal & Property" }
+  ];
+
+  var stage = document.getElementById('scene-stage');
+  var loadingEl = document.getElementById('scene-loading');
+  if (!stage) return;
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isTouch = 'ontouchstart' in window;
+
+  if (!window.THREE) {
+    if (loadingEl) loadingEl.textContent = 'Could not load 3D library.';
+    return;
+  }
+  if (loadingEl) loadingEl.style.display = 'none';
+
+  var width = stage.clientWidth;
+  var height = stage.clientHeight;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
+  camera.position.set(0, 0.35, 6.3);
+  camera.lookAt(0, 0.15, 0);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  stage.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xdbe7f5, 0.95));
+  var keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  keyLight.position.set(4, 6, 5);
+  scene.add(keyLight);
+  var fillLight = new THREE.DirectionalLight(0xbcd7f2, 0.35);
+  fillLight.position.set(-5, -1, -3);
+  scene.add(fillLight);
+  var accentLight = new THREE.PointLight(BLUE, 1.1, 12);
+  accentLight.position.set(0, 1.5, 4);
+  scene.add(accentLight);
+
+  function roundedRectShape(w, h, r) {
+    var shape = new THREE.Shape();
+    var x = -w / 2, y = -h / 2;
+    shape.moveTo(x, y + r);
+    shape.lineTo(x, y + h - r);
+    shape.quadraticCurveTo(x, y + h, x + r, y + h);
+    shape.lineTo(x + w - r, y + h);
+    shape.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
+    shape.lineTo(x + w, y + r);
+    shape.quadraticCurveTo(x + w, y, x + w - r, y);
+    shape.lineTo(x + r, y);
+    shape.quadraticCurveTo(x, y, x, y + r);
+    return shape;
+  }
+
+  var BLADE_LEN = 1.7, BLADE_H = 1.7, BLADE_R = 0.08;
+  var CENTER_GAP = 0.24;
+  var RISE_HEIGHT = 0.42;
+  var cardShape = roundedRectShape(BLADE_LEN, BLADE_H, BLADE_R);
+  var cardGeo = new THREE.ExtrudeGeometry(cardShape, {
+    depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3
+  });
+  cardGeo.center();
+
+  var chipGeo = new THREE.BoxGeometry(0.22, 0.16, 0.018);
+  var stripeGeo = new THREE.BoxGeometry(BLADE_LEN - 0.5, 0.12, 0.014);
+
+  function makeLabelTexture(text, color, fontSize) {
+    var c = document.createElement('canvas');
+    c.width = 512; c.height = 160;
+    var ctx = c.getContext('2d');
+    ctx.font = (fontSize || 38) + 'px "DM Sans", sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    var words = text.split(' ');
+    if (text.length > 14 && words.length > 1) {
+      var mid = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, mid).join(' '), 256, 58);
+      ctx.fillText(words.slice(mid).join(' '), 256, 108);
+    } else {
+      ctx.fillText(text, 256, 80);
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  var n = PRODUCTS.length;
+  var TWO_PI = Math.PI * 2;
+  var HALF_LEN = BLADE_LEN / 2;
+  var RADIUS = HALF_LEN + CENTER_GAP;
+  var CAM_ALIGN = -Math.PI / 2;
+  var SHOWCASE_ANGLE = Math.PI / 2;
+
+  var wheel = new THREE.Group();
+  scene.add(wheel);
+
+  var cards = PRODUCTS.map(function (product, i) {
+    var body = new THREE.Group();
+
+    var mat = new THREE.MeshPhysicalMaterial({
+      color: NAVY, metalness: 0.7, roughness: 0.28,
+      clearcoat: 0.55, clearcoatRoughness: 0.2
+    });
+    var cardMesh = new THREE.Mesh(cardGeo, mat);
+    body.add(cardMesh);
+
+    var chipMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    var chip = new THREE.Mesh(chipGeo, chipMat);
+    chip.position.set(-BLADE_LEN / 2 + 0.26, BLADE_H / 2 - 0.26, 0.038);
+    body.add(chip);
+
+    var stripeMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff, metalness: 0.1, roughness: 0.6, transparent: true, opacity: 0.32
+    });
+    var stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.set(0.2, -BLADE_H / 2 + 0.26, 0.034);
+    body.add(stripe);
+
+    var labelTex = makeLabelTexture(product.label, '#ffffff', 34);
+    var labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true });
+    var labelPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.4), labelMat);
+    labelPlane.position.set(0.05, -0.05, 0.038);
+    body.add(labelPlane);
+
+    body.userData = {
+      material: mat, chipMat: chipMat, stripeMat: stripeMat, labelMat: labelMat,
+      product: product, cardMesh: cardMesh, baseAngle: i * (TWO_PI / n), liftY: 0
+    };
+    cardMesh.userData.body = body;
+    wheel.add(body);
+    return body;
+  });
+
+  function setCardStyle(body, isFront) {
+    var d = body.userData;
+    d.material.color.set(isFront ? BLUE : NAVY);
+    d.material.metalness = isFront ? 0.25 : 0.7;
+    d.material.emissive.set(isFront ? 0x1c4a72 : 0x000000);
+    d.material.emissiveIntensity = isFront ? 0.25 : 0;
+    d.chipMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.opacity = isFront ? 0.9 : 0.32;
+    var oldTex = d.labelMat.map;
+    d.labelMat.map = makeLabelTexture(d.product.label, isFront ? '#001C44' : '#ffffff', isFront ? 40 : 32);
+    d.labelMat.needsUpdate = true;
+    if (oldTex) oldTex.dispose();
+  }
+
+  function normalizeAngle(a) {
+    a = a % TWO_PI;
+    if (a < 0) a += TWO_PI;
+    return a;
+  }
+  function shortestDelta(from, to) {
+    var diff = normalizeAngle(to) - normalizeAngle(from);
+    if (diff > Math.PI) diff -= TWO_PI;
+    if (diff < -Math.PI) diff += TWO_PI;
+    return diff;
+  }
+  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
+
+  var spinOffset = 0;
+  var SPIN_SPEED = reduceMotion ? 0 : 0.16;
+  var snap = null;
+  var lastFrontIndex = -1;
+
+  /* Drag + momentum state — lets a visitor grab the wheel and fling it,
+     rather than only being able to click a card to select it. */
+  var dragging = false;
+  var downPos = null;
+  var pointerId = null;
+  var lastMoveX = 0;
+  var lastMoveTs = 0;
+  var dragVelocity = 0;   /* rad/sec while actively dragging (smoothed) */
+  var momentumVelocity = 0; /* rad/sec once released, decays to 0 */
+  var DRAG_SENSITIVITY = 0.009; /* rad of spin per px of pointer travel */
+  var MOMENTUM_DECAY = 0.0025;  /* lower = wheel coasts longer after a flick */
+
+  function frontIndexFor(offset) {
+    var best = 0, bestDist = Infinity;
+    cards.forEach(function (body, i) {
+      var theta = body.userData.baseAngle + offset;
+      var dist = Math.abs(shortestDelta(theta, SHOWCASE_ANGLE));
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
+
+  function selectCard(i) {
+    var currentAngle = cards[i].userData.baseAngle + spinOffset;
+    var delta = shortestDelta(currentAngle, SHOWCASE_ANGLE);
+    if (reduceMotion) {
+      spinOffset += delta;
+      return;
+    }
+    momentumVelocity = 0;
+    snap = { startOffset: spinOffset, deltaTotal: delta, startTime: performance.now(), duration: 700 };
+  }
+
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  var cardMeshes = cards.map(function (b) { return b.userData.cardMesh; });
+
+  function setMouseFromEvent(e) {
+    var rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+  function pickCardAt(e) {
+    setMouseFromEvent(e);
+    raycaster.setFromCamera(mouse, camera);
+    var hits = raycaster.intersectObjects(cardMeshes, false);
+    if (!hits.length) return null;
+    return hits[0].object.userData.body;
+  }
+
+  renderer.domElement.addEventListener('pointerdown', function (e) {
+    downPos = { x: e.clientX, y: e.clientY };
+    dragging = true;
+    snap = null;
+    momentumVelocity = 0;
+    dragVelocity = 0;
+    lastMoveX = e.clientX;
+    lastMoveTs = performance.now();
+    pointerId = e.pointerId;
+    try { renderer.domElement.setPointerCapture(pointerId); } catch (err) {}
+    renderer.domElement.style.cursor = 'grabbing';
+  });
+
+  renderer.domElement.addEventListener('pointermove', function (e) {
+    if (!isTouch && !dragging) {
+      var hovered = pickCardAt(e);
+      renderer.domElement.style.cursor = hovered ? 'pointer' : 'grab';
+    }
+    if (!dragging) return;
+    var now = performance.now();
+    var dx = e.clientX - lastMoveX;
+    var dt = Math.max((now - lastMoveTs) / 1000, 1 / 120);
+    var angleDelta = dx * DRAG_SENSITIVITY;
+    spinOffset += angleDelta;
+    dragVelocity = angleDelta / dt;
+    lastMoveX = e.clientX;
+    lastMoveTs = now;
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    renderer.domElement.style.cursor = 'grab';
+    if (pointerId !== null) {
+      try { renderer.domElement.releasePointerCapture(pointerId); } catch (err) {}
+      pointerId = null;
+    }
+    if (!downPos) return;
+    var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
+    downPos = null;
+    if (Math.sqrt(dx * dx + dy * dy) > 6) {
+      /* it was a drag, not a tap — hand off to momentum so the wheel
+         keeps coasting in the direction it was flung */
+      momentumVelocity = reduceMotion ? 0 : dragVelocity;
+      return;
+    }
+    var body = pickCardAt(e);
+    if (body) {
+      var idx = cards.indexOf(body);
+      if (idx >= 0) selectCard(idx);
+    }
+  }
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointercancel', function () {
+    dragging = false;
+    downPos = null;
+    if (pointerId !== null) {
+      try { renderer.domElement.releasePointerCapture(pointerId); } catch (err) {}
+      pointerId = null;
+    }
+  });
+
+  function onResize() {
+    width = stage.clientWidth;
+    height = stage.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+  window.addEventListener('resize', onResize);
+
+  var lastTs = null;
+
+  function animate(ts) {
+    requestAnimationFrame(animate);
+    if (lastTs === null) lastTs = ts;
+    var dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+
+    if (dragging) {
+      /* spinOffset is already being driven directly by pointermove */
+    } else if (snap) {
+      var p = Math.min(Math.max((ts - snap.startTime) / snap.duration, 0), 1);
+      var ep = easeOutCubic(p);
+      spinOffset = snap.startOffset + snap.deltaTotal * ep;
+      if (p >= 1) snap = null;
+    } else if (Math.abs(momentumVelocity) > 0.001) {
+      spinOffset += momentumVelocity * dt;
+      var friction = Math.exp(-MOMENTUM_DECAY * dt * 1000);
+      momentumVelocity *= friction;
+      if (Math.abs(momentumVelocity) <= 0.001) momentumVelocity = 0;
+    } else {
+      spinOffset += SPIN_SPEED * dt;
+    }
+
+    cards.forEach(function (body) {
+      var theta = body.userData.baseAngle + spinOffset;
+      var rotY = theta + CAM_ALIGN;
+      var radialX = Math.cos(rotY);
+      var radialZ = -Math.sin(rotY);
+      body.rotation.y = rotY;
+      body.position.x = radialX * RADIUS;
+      body.position.z = radialZ * RADIUS;
+    });
+
+    var frontIndex = frontIndexFor(spinOffset);
+    if (frontIndex !== lastFrontIndex) {
+      if (lastFrontIndex >= 0) setCardStyle(cards[lastFrontIndex], false);
+      setCardStyle(cards[frontIndex], true);
+      lastFrontIndex = frontIndex;
+    }
+    cards.forEach(function (body, i) {
+      var targetScale = i === frontIndex ? 1.08 : 1;
+      body.scale.x += (targetScale - body.scale.x) * 0.15;
+      body.scale.y += (targetScale - body.scale.y) * 0.15;
+      body.scale.z += (targetScale - body.scale.z) * 0.15;
+
+      var liftTarget = i === frontIndex ? RISE_HEIGHT : 0;
+      var liftSpeed = liftTarget > body.userData.liftY ? 0.22 : 0.07;
+      body.userData.liftY += (liftTarget - body.userData.liftY) * liftSpeed;
+      body.position.y = body.userData.liftY;
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  requestAnimationFrame(animate);
+})();
+</script>
+
+</body>
+</html>
