@@ -13,9 +13,8 @@
 .hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 460px;gap:56px;align-items:center;align-content:center}
 .hero-title{margin:22px 0 0;font-weight:600;font-size:clamp(2.1rem,3.6vw,3rem);line-height:1.08;letter-spacing:var(--ls-heading);color:var(--navy);max-width:560px}
 .hero-sub{margin:22px 0 0;font-size:1.05rem;color:var(--text-secondary);line-height:1.7;max-width:480px}
-.rate-card{background:#fff;border-radius:var(--radius-xl);box-shadow:var(--shadow-xl);border:1px solid var(--border);padding:26px}
-.rate-row{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-radius:var(--radius-md);background:var(--bg-soft);margin-bottom:10px}
-.rate-row.is-best{background:var(--tint-peach-08);border:1px solid var(--tint-peach-10)}
+.hero-anim{position:relative;width:100%;aspect-ratio:1/1;max-height:460px}
+.hero-anim canvas{display:block;width:100%;height:100%}
 
 .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap-card)}
 .service-card{display:block;background:#fff;border:1px solid var(--border);border-top:3px solid var(--peach);border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow-soft);transition:transform 300ms var(--ease),box-shadow 300ms var(--ease)}
@@ -148,19 +147,7 @@
 <a href="#pathways" class="btn btn-outline">Book a 15-min chat</a>
 </div>
 </div>
-<div class="rate-card">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-<div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.92rem;color:var(--navy)">Owner-Occupied Home Loan</div><div style="font-size:0.74rem;color:var(--text-secondary);margin-top:3px">$650,000 &middot; 80% LVR</div></div>
-<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-pill);font-family:var(--font-heading);font-weight:600;font-size:0.66rem;letter-spacing:var(--ls-eyebrow-tight);text-transform:uppercase;background:var(--tint-peach-10);color:var(--peach)"><span style="width:6px;height:6px;border-radius:50%;background:var(--success)"></span>Live sample</span>
-</div>
-<div class="rate-row is-best"><div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.86rem;color:var(--navy)">Lender A</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">Full-doc</div></div><div style="font-family:var(--font-heading);font-weight:600;font-size:1.3rem;color:var(--peach)">6.49<span style="font-size:0.8rem">%</span></div></div>
-<div class="rate-row"><div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.86rem;color:var(--navy)">Lender B</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">Alt-doc</div></div><div style="font-family:var(--font-heading);font-weight:600;font-size:1.3rem;color:var(--navy)">6.79<span style="font-size:0.8rem">%</span></div></div>
-<div class="rate-row" style="margin-bottom:0"><div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.86rem;color:var(--navy)">Lender C</div><div style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px">Low-doc</div></div><div style="font-family:var(--font-heading);font-weight:600;font-size:1.3rem;color:var(--navy)">7.05<span style="font-size:0.8rem">%</span></div></div>
-<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-<span style="font-size:0.72rem;color:var(--text-secondary);font-style:italic">Sample — your report is personalised</span>
-<span style="font-family:var(--font-heading);font-weight:600;font-size:0.72rem;color:var(--navy)">70+ lenders compared</span>
-</div>
-</div>
+<div class="hero-anim"><canvas id="pp-hero-scene" aria-hidden="true"></canvas></div>
 </section>
 
 <!-- SERVICE GRID -->
@@ -371,6 +358,462 @@
 </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+
+  const CONFIG = {
+    COLORS: {
+      navy:     0x001C44,
+      skyblue:  0x54B4F6,
+      peach:    0xFF5D5C,
+      yellow:   0xFBB766,
+      walls:    0xF7F9FC,
+      trunk:    0x0a2c5c,
+      cabinGlass: 0x00142e
+    },
+    CAMERA: {
+      fov: 32,
+      position: { x: 4.4, y: 3.4, z: 5.6 },
+      lookAt:   { x: 0, y: 0.35, z: 0 }
+    },
+    HOUSE: {
+      width: 1.7,
+      depth: 1.5,
+      wallHeight: 1.05,
+      roofHeight: 0.75,
+      roofOverhang: 0.16,
+      roofThickness: 0.07,
+      doorWidth: 0.32,
+      doorHeight: 0.62,
+      windowSize: 0.26,
+      chimney: { width: 0.16, height: 0.42 }
+    },
+    TILE: {
+      size: 3.2,
+      thickness: 0.22,
+      cornerBevel: 0.06
+    },
+    TREES: {
+      count: 2,
+      trunkRadius: 0.045,
+      trunkHeight: 0.22,
+      coneRadius: 0.24,
+      coneHeight: 0.5,
+      positions: [
+        { x: -1.05, z: 0.55 },
+        { x: -0.75, z: -0.65 }
+      ]
+    },
+    CAR: {
+      bodyLength: 0.62,
+      bodyWidth: 0.34,
+      bodyHeight: 0.2,
+      cabinLength: 0.32,
+      cabinWidth: 0.27,
+      cabinHeight: 0.16,
+      cabinOffsetX: -0.03,
+      wheelRadius: 0.09,
+      wheelWidth: 0.07,
+      axleInsetX: 0.19,
+      trackHalfWidth: 0.15,
+      lightStripWidth: 0.05,
+      start: { x: 1.9, z: 0.97 },
+      park:  { x: 1.05, z: 0.97 },
+      facingAngle: Math.PI,
+      appearAt: 0.04,
+      appearSpan: 0.1,
+      driveStartAt: 0.18,
+      driveArriveAt: 1.0
+    },
+    MOTION: {
+      rotationSpeed: 0.10,
+      bobAmount: 0.04,
+      bobSpeed: 0.5,
+      staticRestAngle: 0.55,
+      parallaxStrength: 0.10,
+      parallaxEase: 0.06
+    },
+    BUILD: {
+      buildDuration: 3.6,
+      holdDuration: 2.6,
+      teardownDuration: 2.2,
+      restDuration: 0.8,
+      partSpan: 0.34,
+      riseOffset: 0.9,
+      dropOffset: 0.9
+    },
+    LIGHTS: {
+      hemi:  { sky: 0xffffff, ground: 0xbfe0ff, intensity: 1.0 },
+      key:   { color: 0xffffff, intensity: 1.0, position: { x: 3.5, y: 5, z: 4 } },
+      accent:{ color: 0x54B4F6, intensity: 0.55, position: { x: -3, y: 1.5, z: -2 }, distance: 12 }
+    },
+    RENDER: {
+      pixelRatioCap: 2
+    }
+  };
+
+  const canvas = document.getElementById('pp-hero-scene');
+  if (!canvas) return;
+  const container = canvas.parentElement;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = matchMedia('(pointer: coarse)').matches;
+
+  const scene = new THREE.Scene();
+
+  function containerSize(){
+    return { w: container.clientWidth || 1, h: container.clientHeight || 1 };
+  }
+
+  const camera = new THREE.PerspectiveCamera(CONFIG.CAMERA.fov, containerSize().w / containerSize().h, 0.1, 100);
+  camera.position.set(CONFIG.CAMERA.position.x, CONFIG.CAMERA.position.y, CONFIG.CAMERA.position.z);
+  camera.lookAt(CONFIG.CAMERA.lookAt.x, CONFIG.CAMERA.lookAt.y, CONFIG.CAMERA.lookAt.z);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.RENDER.pixelRatioCap));
+  renderer.setSize(containerSize().w, containerSize().h);
+
+  const hemi = new THREE.HemisphereLight(CONFIG.LIGHTS.hemi.sky, CONFIG.LIGHTS.hemi.ground, CONFIG.LIGHTS.hemi.intensity);
+  scene.add(hemi);
+
+  const key = new THREE.DirectionalLight(CONFIG.LIGHTS.key.color, CONFIG.LIGHTS.key.intensity);
+  key.position.set(CONFIG.LIGHTS.key.position.x, CONFIG.LIGHTS.key.position.y, CONFIG.LIGHTS.key.position.z);
+  scene.add(key);
+
+  const accent = new THREE.PointLight(CONFIG.LIGHTS.accent.color, CONFIG.LIGHTS.accent.intensity, CONFIG.LIGHTS.accent.distance);
+  accent.position.set(CONFIG.LIGHTS.accent.position.x, CONFIG.LIGHTS.accent.position.y, CONFIG.LIGHTS.accent.position.z);
+  scene.add(accent);
+
+  const world = new THREE.Group();
+  scene.add(world);
+
+  const groundY = CONFIG.TILE.thickness * 0.4;
+
+  function flatMat(hex, roughness, metalness){
+    return new THREE.MeshStandardMaterial({
+      color: hex,
+      flatShading: true,
+      roughness: roughness !== undefined ? roughness : 0.75,
+      metalness: metalness !== undefined ? metalness : 0.05,
+      transparent: true,
+      opacity: 0
+    });
+  }
+
+  const parts = [];
+
+  function registerPart(mesh, dir, offset){
+    parts.push({ mesh: mesh, dir: dir, offset: offset || 0, restY: mesh.position.y });
+    if (dir === 'scale') mesh.scale.setScalar(0);
+  }
+
+  function buildTile(){
+    const group = new THREE.Group();
+    const t = CONFIG.TILE;
+
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(t.size, t.thickness, t.size),
+      flatMat(CONFIG.COLORS.navy, 0.6, 0.1)
+    );
+    base.position.y = -t.thickness / 2;
+    group.add(base);
+    registerPart(base, 'up', CONFIG.BUILD.riseOffset * 0.5);
+
+    const topSize = t.size - t.cornerBevel * 2;
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(topSize, t.thickness * 0.4, topSize),
+      flatMat(CONFIG.COLORS.skyblue, 0.5, 0.05)
+    );
+    top.position.y = t.thickness * 0.2;
+    group.add(top);
+    registerPart(top, 'scale');
+
+    return group;
+  }
+
+  function buildHouse(){
+    const group = new THREE.Group();
+    const h = CONFIG.HOUSE;
+
+    const walls = new THREE.Mesh(
+      new THREE.BoxGeometry(h.width, h.wallHeight, h.depth),
+      flatMat(CONFIG.COLORS.walls, 0.8, 0)
+    );
+    walls.position.y = h.wallHeight / 2;
+    group.add(walls);
+    registerPart(walls, 'up', CONFIG.BUILD.riseOffset);
+
+    const roofRun = h.width / 2 + h.roofOverhang;
+    const roofLen = Math.sqrt(roofRun * roofRun + h.roofHeight * h.roofHeight);
+    const roofAngle = Math.atan2(h.roofHeight, roofRun);
+    const roofDepth = h.depth + h.roofOverhang * 2;
+
+    const roofA = new THREE.Mesh(
+      new THREE.BoxGeometry(roofLen, h.roofThickness, roofDepth),
+      flatMat(CONFIG.COLORS.navy, 0.55, 0.08)
+    );
+    roofA.position.set(-roofRun / 2, h.wallHeight + h.roofHeight / 2, 0);
+    roofA.rotation.z = roofAngle;
+    group.add(roofA);
+    registerPart(roofA, 'down', CONFIG.BUILD.dropOffset);
+
+    const roofB = new THREE.Mesh(
+      new THREE.BoxGeometry(roofLen, h.roofThickness, roofDepth),
+      flatMat(CONFIG.COLORS.navy, 0.55, 0.08)
+    );
+    roofB.position.set(roofRun / 2, h.wallHeight + h.roofHeight / 2, 0);
+    roofB.rotation.z = -roofAngle;
+    group.add(roofB);
+    registerPart(roofB, 'down', CONFIG.BUILD.dropOffset);
+
+    const chimney = new THREE.Mesh(
+      new THREE.BoxGeometry(h.chimney.width, h.chimney.height, h.chimney.width),
+      flatMat(CONFIG.COLORS.navy, 0.6, 0.05)
+    );
+    chimney.position.set(h.width * 0.22, h.wallHeight + h.roofHeight * 0.65, h.depth * 0.15);
+    group.add(chimney);
+    registerPart(chimney, 'up', CONFIG.BUILD.riseOffset * 0.6);
+
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(h.doorWidth, h.doorHeight, 0.03),
+      flatMat(CONFIG.COLORS.skyblue, 0.4, 0.1)
+    );
+    door.position.set(0, h.doorHeight / 2, h.depth / 2 + 0.015);
+    group.add(door);
+    registerPart(door, 'scale');
+
+    [-1, 1].forEach(side => {
+      const win = new THREE.Mesh(
+        new THREE.BoxGeometry(h.windowSize, h.windowSize, 0.03),
+        flatMat(CONFIG.COLORS.skyblue, 0.3, 0.15)
+      );
+      win.position.set(side * (h.width * 0.32), h.wallHeight * 0.62, h.depth / 2 + 0.015);
+      group.add(win);
+      registerPart(win, 'scale');
+    });
+
+    return group;
+  }
+
+  function buildTree(colorHex){
+    const group = new THREE.Group();
+    const t = CONFIG.TREES;
+
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(t.trunkRadius, t.trunkRadius * 1.2, t.trunkHeight, 8),
+      flatMat(CONFIG.COLORS.trunk, 0.8, 0.05)
+    );
+    trunk.position.y = t.trunkHeight / 2;
+    group.add(trunk);
+    registerPart(trunk, 'up', CONFIG.BUILD.riseOffset * 0.4);
+
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(t.coneRadius, t.coneHeight, 8),
+      flatMat(colorHex, 0.6, 0.05)
+    );
+    cone.position.y = t.trunkHeight + t.coneHeight / 2 - 0.03;
+    group.add(cone);
+    registerPart(cone, 'scale');
+
+    return group;
+  }
+
+  function buildCar(){
+    const c = CONFIG.CAR;
+    const group = new THREE.Group();
+    const materials = [];
+    const wheels = [];
+
+    function mat(hex, roughness, metalness){
+      const m = flatMat(hex, roughness, metalness);
+      materials.push(m);
+      return m;
+    }
+
+    const wheelBaseY = c.wheelRadius;
+    const bodyBaseY = c.wheelRadius * 1.3;
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(c.bodyLength, c.bodyHeight, c.bodyWidth),
+      mat(CONFIG.COLORS.skyblue, 0.4, 0.2)
+    );
+    body.position.y = bodyBaseY + c.bodyHeight / 2;
+    group.add(body);
+
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(c.cabinLength, c.cabinHeight, c.cabinWidth),
+      mat(CONFIG.COLORS.cabinGlass, 0.3, 0.3)
+    );
+    cabin.position.set(c.cabinOffsetX, bodyBaseY + c.bodyHeight + c.cabinHeight / 2, 0);
+    group.add(cabin);
+
+    const headlight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.045, c.bodyWidth - c.lightStripWidth),
+      mat(CONFIG.COLORS.yellow, 0.3, 0.1)
+    );
+    headlight.position.set(c.bodyLength / 2 + 0.005, bodyBaseY + c.bodyHeight * 0.55, 0);
+    group.add(headlight);
+
+    const taillight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.045, c.bodyWidth - c.lightStripWidth),
+      mat(CONFIG.COLORS.peach, 0.3, 0.1)
+    );
+    taillight.position.set(-(c.bodyLength / 2 + 0.005), bodyBaseY + c.bodyHeight * 0.55, 0);
+    group.add(taillight);
+
+    const wheelGeo = new THREE.CylinderGeometry(c.wheelRadius, c.wheelRadius, c.wheelWidth, 14);
+    wheelGeo.rotateX(Math.PI / 2);
+    const wheelMat = mat(CONFIG.COLORS.navy, 0.55, 0.2);
+
+    [-1, 1].forEach(xSide => {
+      [-1, 1].forEach(zSide => {
+        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        wheel.position.set(xSide * c.axleInsetX, wheelBaseY, zSide * c.trackHalfWidth);
+        group.add(wheel);
+        wheels.push(wheel);
+      });
+    });
+
+    return { group, materials, wheels };
+  }
+
+  world.add(buildTile());
+
+  const house = buildHouse();
+  house.position.set(0.35, groundY, -0.1);
+  world.add(house);
+
+  const treeColors = [CONFIG.COLORS.peach, CONFIG.COLORS.yellow];
+  CONFIG.TREES.positions.slice(0, CONFIG.TREES.count).forEach((pos, i) => {
+    const tree = buildTree(treeColors[i % treeColors.length]);
+    tree.position.set(pos.x, groundY, pos.z);
+    world.add(tree);
+  });
+
+  const car = buildCar();
+  car.group.position.set(CONFIG.CAR.start.x, groundY, CONFIG.CAR.start.z);
+  car.group.rotation.y = CONFIG.CAR.facingAngle;
+  car.prevX = CONFIG.CAR.start.x;
+  world.add(car.group);
+
+  const partSpan = CONFIG.BUILD.partSpan;
+  const step = parts.length > 1 ? (1 - partSpan) / (parts.length - 1) : 0;
+  parts.forEach((p, i) => {
+    p.appearAt = i * step;
+    p.duration = partSpan;
+  });
+
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  function clamp01(x){ return Math.min(1, Math.max(0, x)); }
+  function lerp(a, b, t){ return a + (b - a) * t; }
+
+  function applyAssembly(g){
+    parts.forEach(p => {
+      const local = clamp01((g - p.appearAt) / p.duration);
+      const eased = easeOutCubic(local);
+      p.mesh.material.opacity = eased;
+      if (p.dir === 'scale'){
+        p.mesh.scale.setScalar(eased);
+      } else {
+        const sign = p.dir === 'up' ? -1 : 1;
+        p.mesh.position.y = p.restY + sign * p.offset * (1 - eased);
+        p.mesh.scale.setScalar(0.85 + 0.15 * eased);
+      }
+    });
+  }
+
+  function applyCar(g){
+    const c = CONFIG.CAR;
+    const fadeLocal = clamp01((g - c.appearAt) / c.appearSpan);
+    const opacity = easeOutCubic(fadeLocal);
+    car.materials.forEach(m => { m.opacity = opacity; });
+
+    const driveLocal = clamp01((g - c.driveStartAt) / (c.driveArriveAt - c.driveStartAt));
+    const eased = easeOutCubic(driveLocal);
+    const newX = lerp(c.start.x, c.park.x, eased);
+    const newZ = lerp(c.start.z, c.park.z, eased);
+
+    const deltaX = newX - car.prevX;
+    const spin = deltaX / c.wheelRadius;
+    car.wheels.forEach(w => { w.rotation.z += spin; });
+
+    car.group.position.x = newX;
+    car.group.position.z = newZ;
+    car.prevX = newX;
+  }
+
+  function assemblyAmountAt(t){
+    const B = CONFIG.BUILD;
+    const cycle = B.buildDuration + B.holdDuration + B.teardownDuration + B.restDuration;
+    const tm = t % cycle;
+    if (tm < B.buildDuration){
+      return tm / B.buildDuration;
+    }
+    if (tm < B.buildDuration + B.holdDuration){
+      return 1;
+    }
+    if (tm < B.buildDuration + B.holdDuration + B.teardownDuration){
+      return 1 - (tm - B.buildDuration - B.holdDuration) / B.teardownDuration;
+    }
+    return 0;
+  }
+
+  const pointer = { x: 0, y: 0 };
+  const parallax = { x: 0, y: 0 };
+
+  if (!isTouch && !reduceMotion){
+    window.addEventListener('pointermove', (e) => {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+    });
+  }
+
+  const baseY = world.position.y;
+  const clockStart = performance.now();
+
+  function renderStaticFrame(){
+    applyAssembly(1);
+    applyCar(1);
+    world.rotation.y = CONFIG.MOTION.staticRestAngle;
+    renderer.render(scene, camera);
+  }
+
+  function tick(){
+    const t = (performance.now() - clockStart) / 1000;
+    const g = assemblyAmountAt(t);
+
+    applyAssembly(g);
+    applyCar(g);
+
+    world.rotation.y = t * CONFIG.MOTION.rotationSpeed;
+    world.position.y = baseY + Math.sin(t * CONFIG.MOTION.bobSpeed) * CONFIG.MOTION.bobAmount;
+
+    parallax.x += (pointer.x - parallax.x) * CONFIG.MOTION.parallaxEase;
+    parallax.y += (pointer.y - parallax.y) * CONFIG.MOTION.parallaxEase;
+    world.rotation.x = -parallax.y * CONFIG.MOTION.parallaxStrength * 0.5;
+    world.rotation.y += parallax.x * CONFIG.MOTION.parallaxStrength;
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+
+  if (reduceMotion){
+    renderStaticFrame();
+  } else {
+    tick();
+  }
+
+  window.addEventListener('resize', () => {
+    const size = containerSize();
+    camera.aspect = size.w / size.h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(size.w, size.h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.RENDER.pixelRatioCap));
+    if (reduceMotion) renderer.render(scene, camera);
+  });
+
+})();
+</script>
 <script src="assets/js/main.js"></script>
 <script>
 // Prevent the static enquiry form from doing a real GET submit until Zoho is wired up.
