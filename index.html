@@ -117,6 +117,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
 .hero-grid>div{min-width:0;}
 .scene-stage{position:relative;height:460px;overflow:visible;}
 .scene-stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;}
+.scene-stage canvas.is-dragging{cursor:grabbing;}
 .scene-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(0,28,68,0.45);pointer-events:none;}
 .scene-hint{font-family:'DM Sans',sans-serif;font-size:12.5px;color:rgba(0,28,68,0.4);text-align:center;margin-top:8px;}
 </style>
@@ -213,7 +214,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
       <div class="scene-stage" id="scene-stage">
         <div class="scene-loading" id="scene-loading">Loading…</div>
       </div>
-      <div class="scene-hint" id="scene-hint">Drag to spin, or click a card to choose it</div>
+      <div class="scene-hint" id="scene-hint">Tap a coin to light it up, or flick it to spin</div>
     </div>
   </div>
 </section>
@@ -366,362 +367,734 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function () {
-  var NAVY = 0x001C44;
-  var BLUE = 0x54B4F6;
 
-  var PRODUCTS = [
-    { label: "Term loan", channel: "Commercial" },
-    { label: "Line of credit", channel: "Commercial" },
-    { label: "Equipment finance", channel: "Commercial" },
-    { label: "Vendor finance", channel: "Connect" },
-    { label: "Point-of-sale finance", channel: "Connect" },
-    { label: "Home loan", channel: "Personal & Property" },
-    { label: "Property finance", channel: "Personal & Property" }
-  ];
+  /* ======================================================================
+     CONFIG — ported from the "coins" hero scene. Every visual / behavioural
+     knob lives here; nothing below this object should contain magic numbers.
+  ====================================================================== */
+  var CONFIG = {
+
+    COLORS: {
+      navy:      0x001C44,
+      navyDark:  0x000C22,
+      navyLight: 0x1C4E86,
+      skyblue:   0x54B4F6,
+      white:     0xFFFFFF,
+    },
+    COLOR_STRINGS: {
+      navy:      '#001C44',
+      navyDark:  '#000C22',
+      navyLight: '#1C4E86',
+      skyblue:   '#54B4F6',
+      white:     '#FFFFFF',
+    },
+
+    CAMERA_FOV: 32,
+    CAMERA_POSITION: { x: 0, y: 0.2, z: 9 },
+    CAMERA_LOOKAT:   { x: 0, y: 0, z: 0 },
+
+    LIGHTS: {
+      hemiSkyColor:    0xFFFFFF,
+      hemiGroundColor: 0xBFE0FF,
+      hemiIntensity:   0.9,
+      keyColor:        0xFFFFFF,
+      keyIntensity:    1.3,
+      keyPosition:     { x: 4, y: 6, z: 7 },
+      accentColor:     0x54B4F6,
+      accentIntensity: 0.75,
+      accentPosition:  { x: -3, y: -1.5, z: 4.5 },
+      glowColor:       0xFFFFFF,
+      glowIntensity:   1.05,
+      glowPosition:    { x: 2.5, y: 2.5, z: 6 },
+      fillColor:       0xBFE0FF,
+      fillIntensity:   0.4,
+      fillPosition:    { x: -5, y: -3, z: -4 },
+    },
+
+    MATERIAL: {
+      metalness: 0.3,
+      roughness: 0.32,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.22,
+      envMapIntensity: 0.55,
+    },
+    EMBOSS: {
+      TEXTURE_SIZE: 256,
+      BLUR_PX: 5,
+      HEIGHT_STRENGTH: 3.2,
+      NORMAL_SCALE: 1.6,
+    },
+
+    CLUSTER_OFFSET: { x: 0, y: -0.05, z: 0 },
+
+    WORDS: ['PERSONAL', 'PROPERTY', 'COMMERCIAL', 'VENDOR'],
+    COIN_COUNT: 12,
+    COIN_RADIUS_MIN: 0.4,
+    COIN_RADIUS_MAX: 0.68,
+    COIN_THICKNESS_RATIO: 0.11,
+    COIN_SEGMENTS: 56,
+
+    LOGO_SCALE: 0.56,
+    WORD_FONT_FAMILY: "'DM Sans', sans-serif",
+    WORD_FONT_WEIGHT: 800,
+    WORD_MAX_WIDTH_RATIO: 0.72,
+    WORD_HIGHLIGHT_GLOW: 0.06,
+
+    COIN_IDLE_SPIN_MIN: 0.1,
+    COIN_IDLE_SPIN_MAX: 0.32,
+
+    COIN_SPREAD_X: 2.6,
+    COIN_SPREAD_Y: 2.5,
+    COIN_SPREAD_Z: 2.1,
+    MIN_GAP: 0.45,
+    INITIAL_SEPARATION_ITERATIONS: 280,
+    LIVE_SEPARATION_ITERATIONS: 4,
+    LIVE_SEPARATION_STRENGTH: 0.18,
+
+    LAYOUT_BOUNDS: { xMin: -3.2, xMax: 3.2, yMin: -3.0, yMax: 3.0, zMin: -2.6, zMax: 2.6 },
+    DRAG_BOUNDS: { xMin: -3.6, xMax: 3.6, yMin: -3.3, yMax: 3.3, zMin: -3.0, zMax: 3.0 },
+
+    CLUSTER_SPIN_SPEED_Y: 0.07,
+    CLUSTER_BASE_TILT_X: 0.06,
+
+    POINTER_TILT_MAX: 0.1,
+    POINTER_TILT_EASE: 0.045,
+
+    DRAG_SPIN_MULTIPLIER: 0.9,
+    FLICK_SPIN_MAX: 14,
+    FLICK_SPIN_DECAY: 0.94,
+
+    CLICK: {
+      MOVE_THRESHOLD_PX: 6,
+      TIME_THRESHOLD_MS: 450,
+      GLOW_COLOR: 0x54B4F6,
+      GLOW_PEAK_INTENSITY: 1.3,
+      GLOW_DECAY: 0.92,
+      GLOW_DECAY_STEP: 0.5,
+    },
+  };
 
   var stage = document.getElementById('scene-stage');
   var loadingEl = document.getElementById('scene-loading');
   if (!stage) return;
-  var reduceMotion = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var isTouch = 'ontouchstart' in window;
+
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isCoarsePointer = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
 
   if (!window.THREE) {
     if (loadingEl) loadingEl.textContent = 'Could not load 3D library.';
     return;
   }
-  if (loadingEl) loadingEl.style.display = 'none';
 
-  var width = stage.clientWidth;
-  var height = stage.clientHeight;
+  /* ======================================================================
+     RENDERER / SCENE / CAMERA
+  ====================================================================== */
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  var canvas = renderer.domElement;
+  stage.appendChild(canvas);
 
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
-  camera.position.set(0, 0.35, 6.3);
-  camera.lookAt(0, 0.15, 0);
 
-  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(width, height);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  stage.appendChild(renderer.domElement);
+  var camera = new THREE.PerspectiveCamera(CONFIG.CAMERA_FOV, 1, 0.1, 100);
+  camera.position.set(CONFIG.CAMERA_POSITION.x, CONFIG.CAMERA_POSITION.y, CONFIG.CAMERA_POSITION.z);
+  camera.lookAt(CONFIG.CAMERA_LOOKAT.x, CONFIG.CAMERA_LOOKAT.y, CONFIG.CAMERA_LOOKAT.z);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xdbe7f5, 0.95));
-  var keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
-  keyLight.position.set(4, 6, 5);
-  scene.add(keyLight);
-  var fillLight = new THREE.DirectionalLight(0xbcd7f2, 0.35);
-  fillLight.position.set(-5, -1, -3);
-  scene.add(fillLight);
-  var accentLight = new THREE.PointLight(BLUE, 1.1, 12);
-  accentLight.position.set(0, 1.5, 4);
-  scene.add(accentLight);
+  var cluster = new THREE.Group();
+  cluster.position.set(CONFIG.CLUSTER_OFFSET.x, CONFIG.CLUSTER_OFFSET.y, CONFIG.CLUSTER_OFFSET.z);
+  scene.add(cluster);
 
-  function roundedRectShape(w, h, r) {
-    var shape = new THREE.Shape();
-    var x = -w / 2, y = -h / 2;
-    shape.moveTo(x, y + r);
-    shape.lineTo(x, y + h - r);
-    shape.quadraticCurveTo(x, y + h, x + r, y + h);
-    shape.lineTo(x + w - r, y + h);
-    shape.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
-    shape.lineTo(x + w, y + r);
-    shape.quadraticCurveTo(x + w, y, x + w - r, y);
-    shape.lineTo(x + r, y);
-    shape.quadraticCurveTo(x, y, x, y + r);
-    return shape;
+  var coinsGroup = new THREE.Group();
+  cluster.add(coinsGroup);
+
+  function resize() {
+    var w = stage.clientWidth;
+    var h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    if (reducedMotion) renderOnce();
+  }
+  window.addEventListener('resize', resize);
+
+  /* ======================================================================
+     LIGHTING
+  ====================================================================== */
+  var L = CONFIG.LIGHTS;
+
+  scene.add(new THREE.HemisphereLight(L.hemiSkyColor, L.hemiGroundColor, L.hemiIntensity));
+
+  var key = new THREE.DirectionalLight(L.keyColor, L.keyIntensity);
+  key.position.set(L.keyPosition.x, L.keyPosition.y, L.keyPosition.z);
+  scene.add(key);
+
+  var accent = new THREE.PointLight(L.accentColor, L.accentIntensity, 22);
+  accent.position.set(L.accentPosition.x, L.accentPosition.y, L.accentPosition.z);
+  scene.add(accent);
+
+  var glow = new THREE.PointLight(L.glowColor, L.glowIntensity, 24);
+  glow.position.set(L.glowPosition.x, L.glowPosition.y, L.glowPosition.z);
+  scene.add(glow);
+
+  var fill = new THREE.DirectionalLight(L.fillColor, L.fillIntensity);
+  fill.position.set(L.fillPosition.x, L.fillPosition.y, L.fillPosition.z);
+  scene.add(fill);
+
+  /* ======================================================================
+     PROCEDURAL REFLECTION ENVIRONMENT
+  ====================================================================== */
+  function buildEnvMap() {
+    var size = 128;
+    function face(stops) {
+      var c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      var ctx = c.getContext('2d');
+      var grad = ctx.createLinearGradient(0, 0, 0, size);
+      stops.forEach(function (s) { grad.addColorStop(s[0], s[1]); });
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      return c;
+    }
+    var side = [[0, '#BFE0FF'], [0.5, '#5C93C4'], [1, '#1C4E86']];
+
+    var images = [
+      face(side),
+      face(side),
+      face([[0, '#DCEEFF'], [1, '#7FB8EF']]),
+      face([[0, '#1C4E86'], [1, '#000C22']]),
+      face(side),
+      face(side),
+    ];
+    var cubeTexture = new THREE.CubeTexture(images);
+    cubeTexture.needsUpdate = true;
+    return cubeTexture;
+  }
+  var envMap = buildEnvMap();
+
+  /* ======================================================================
+     ASSET LOADING (white wordmark, embedded as a data URI)
+  ====================================================================== */
+  var ASSETS = {
+    logoWhite: "data:image/png;base64,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",
+  };
+
+  function loadImage(src) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { resolve(null); };
+      img.src = src;
+    });
   }
 
-  var BLADE_LEN = 1.7, BLADE_H = 1.7, BLADE_R = 0.08;
-  var CENTER_GAP = 0.24;
-  var RISE_HEIGHT = 0.42;
-  var cardShape = roundedRectShape(BLADE_LEN, BLADE_H, BLADE_R);
-  var cardGeo = new THREE.ExtrudeGeometry(cardShape, {
-    depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3
-  });
-  cardGeo.center();
+  /* ======================================================================
+     EMBOSSED FACE ART
+  ====================================================================== */
+  var E = CONFIG.EMBOSS;
 
-  var chipGeo = new THREE.BoxGeometry(0.22, 0.16, 0.018);
-  var stripeGeo = new THREE.BoxGeometry(BLADE_LEN - 0.5, 0.12, 0.014);
-
-  function makeLabelTexture(text, color, fontSize) {
+  function blankHeightCanvas() {
     var c = document.createElement('canvas');
-    c.width = 512; c.height = 160;
+    c.width = E.TEXTURE_SIZE; c.height = E.TEXTURE_SIZE;
     var ctx = c.getContext('2d');
-    ctx.font = (fontSize || 38) + 'px "DM Sans", sans-serif';
-    ctx.fillStyle = color;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    var words = text.split(' ');
-    if (text.length > 14 && words.length > 1) {
-      var mid = Math.ceil(words.length / 2);
-      ctx.fillText(words.slice(0, mid).join(' '), 256, 58);
-      ctx.fillText(words.slice(mid).join(' '), 256, 108);
-    } else {
-      ctx.fillText(text, 256, 80);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, c.width, c.height);
+    return { canvas: c, ctx: ctx, size: E.TEXTURE_SIZE };
+  }
+
+  function heightFromImage(img, scaleRatio) {
+    var b = blankHeightCanvas();
+    var canvas2 = b.canvas, ctx = b.ctx, size = b.size;
+    if (img) {
+      var w = size * scaleRatio;
+      var h = w * (img.height / img.width);
+      var tmp = document.createElement('canvas');
+      tmp.width = size; tmp.height = size;
+      var tctx = tmp.getContext('2d');
+      tctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      tctx.globalCompositeOperation = 'source-in';
+      tctx.fillStyle = '#FFFFFF';
+      tctx.fillRect(0, 0, size, size);
+      ctx.drawImage(tmp, 0, 0);
     }
-    var tex = new THREE.CanvasTexture(c);
+    return canvas2;
+  }
+
+  function heightFromWord(word) {
+    var b = blankHeightCanvas();
+    var canvas2 = b.canvas, ctx = b.ctx, size = b.size;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var maxWidth = size * CONFIG.WORD_MAX_WIDTH_RATIO;
+    var fontSize = size * 0.34;
+    ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
+    while (ctx.measureText(word).width > maxWidth && fontSize > 10) {
+      fontSize -= 2;
+      ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
+    }
+    ctx.fillText(word, size / 2, size / 2 + fontSize * 0.03);
+    return canvas2;
+  }
+
+  function normalMapFromHeight(heightCanvas) {
+    var size = heightCanvas.width;
+    var blurred = document.createElement('canvas');
+    blurred.width = size; blurred.height = size;
+    var bctx = blurred.getContext('2d');
+    bctx.filter = 'blur(' + E.BLUR_PX + 'px)';
+    bctx.drawImage(heightCanvas, 0, 0);
+
+    var heightData = bctx.getImageData(0, 0, size, size).data;
+    function getHeight(x, y) {
+      x = x < 0 ? 0 : (x >= size ? size - 1 : x);
+      y = y < 0 ? 0 : (y >= size ? size - 1 : y);
+      return heightData[(y * size + x) * 4] / 255;
+    }
+
+    var out = document.createElement('canvas');
+    out.width = size; out.height = size;
+    var octx = out.getContext('2d');
+    var img = octx.createImageData(size, size);
+    var strength = E.HEIGHT_STRENGTH;
+
+    for (var y = 0; y < size; y++) {
+      for (var x = 0; x < size; x++) {
+        var dx = (getHeight(x + 1, y) - getHeight(x - 1, y)) * strength;
+        var dy = (getHeight(x, y + 1) - getHeight(x, y - 1)) * strength;
+        var nx = -dx, ny = -dy, nz = 1;
+        var len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+        nx /= len; ny /= len; nz /= len;
+        var idx = (y * size + x) * 4;
+        img.data[idx]     = Math.round((nx * 0.5 + 0.5) * 255);
+        img.data[idx + 1] = Math.round((ny * 0.5 + 0.5) * 255);
+        img.data[idx + 2] = Math.round((nz * 0.5 + 0.5) * 255);
+        img.data[idx + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+
+    var tex = new THREE.CanvasTexture(out);
     tex.needsUpdate = true;
     return tex;
   }
 
-  var n = PRODUCTS.length;
-  var TWO_PI = Math.PI * 2;
-  var HALF_LEN = BLADE_LEN / 2;
-  var RADIUS = HALF_LEN + CENTER_GAP;
-  var CAM_ALIGN = -Math.PI / 2;
-  var SHOWCASE_ANGLE = Math.PI / 2;
-
-  var wheel = new THREE.Group();
-  scene.add(wheel);
-
-  var cards = PRODUCTS.map(function (product, i) {
-    var body = new THREE.Group();
-
-    var mat = new THREE.MeshPhysicalMaterial({
-      color: NAVY, metalness: 0.7, roughness: 0.28,
-      clearcoat: 0.55, clearcoatRoughness: 0.2
-    });
-    var cardMesh = new THREE.Mesh(cardGeo, mat);
-    body.add(cardMesh);
-
-    var chipMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
-    var chip = new THREE.Mesh(chipGeo, chipMat);
-    chip.position.set(-BLADE_LEN / 2 + 0.26, BLADE_H / 2 - 0.26, 0.038);
-    body.add(chip);
-
-    var stripeMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff, metalness: 0.1, roughness: 0.6, transparent: true, opacity: 0.32
-    });
-    var stripe = new THREE.Mesh(stripeGeo, stripeMat);
-    stripe.position.set(0.2, -BLADE_H / 2 + 0.26, 0.034);
-    body.add(stripe);
-
-    var labelTex = makeLabelTexture(product.label, '#ffffff', 34);
-    var labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true });
-    var labelPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.4), labelMat);
-    labelPlane.position.set(0.05, -0.05, 0.038);
-    body.add(labelPlane);
-
-    body.userData = {
-      material: mat, chipMat: chipMat, stripeMat: stripeMat, labelMat: labelMat,
-      product: product, cardMesh: cardMesh, baseAngle: i * (TWO_PI / n), liftY: 0
-    };
-    cardMesh.userData.body = body;
-    wheel.add(body);
-    return body;
-  });
-
-  function setCardStyle(body, isFront) {
-    var d = body.userData;
-    d.material.color.set(isFront ? BLUE : NAVY);
-    d.material.metalness = isFront ? 0.25 : 0.7;
-    d.material.emissive.set(isFront ? 0x1c4a72 : 0x000000);
-    d.material.emissiveIntensity = isFront ? 0.25 : 0;
-    d.chipMat.color.set(isFront ? NAVY : 0xffffff);
-    d.stripeMat.color.set(isFront ? NAVY : 0xffffff);
-    d.stripeMat.opacity = isFront ? 0.9 : 0.32;
-    var oldTex = d.labelMat.map;
-    d.labelMat.map = makeLabelTexture(d.product.label, isFront ? '#001C44' : '#ffffff', isFront ? 40 : 32);
-    d.labelMat.needsUpdate = true;
-    if (oldTex) oldTex.dispose();
+  function buildCapGradientTexture() {
+    var size = 256;
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var ctx = c.getContext('2d');
+    var grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0,    CONFIG.COLOR_STRINGS.navyDark);
+    grad.addColorStop(0.55, CONFIG.COLOR_STRINGS.navy);
+    grad.addColorStop(1,    CONFIG.COLOR_STRINGS.navyLight);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    var tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.needsUpdate = true;
+    return tex;
   }
 
-  function normalizeAngle(a) {
-    a = a % TWO_PI;
-    if (a < 0) a += TWO_PI;
-    return a;
-  }
-  function shortestDelta(from, to) {
-    var diff = normalizeAngle(to) - normalizeAngle(from);
-    if (diff > Math.PI) diff -= TWO_PI;
-    if (diff < -Math.PI) diff += TWO_PI;
-    return diff;
-  }
-  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
+  function buildWordColorTexture(word) {
+    var size = 256;
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var ctx = c.getContext('2d');
 
-  var spinOffset = 0;
-  var SPIN_SPEED = reduceMotion ? 0 : 0.16;
-  var snap = null;
-  var lastFrontIndex = -1;
+    var grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0,    CONFIG.COLOR_STRINGS.navyDark);
+    grad.addColorStop(0.55, CONFIG.COLOR_STRINGS.navy);
+    grad.addColorStop(1,    CONFIG.COLOR_STRINGS.navyLight);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
 
-  /* Drag + momentum state — lets a visitor grab the wheel and fling it,
-     rather than only being able to click a card to select it. */
-  var dragging = false;
-  var downPos = null;
-  var pointerId = null;
-  var lastMoveX = 0;
-  var lastMoveTs = 0;
-  var dragVelocity = 0;   /* rad/sec while actively dragging (smoothed) */
-  var momentumVelocity = 0; /* rad/sec once released, decays to 0 */
-  var DRAG_SENSITIVITY = 0.009; /* rad of spin per px of pointer travel */
-  var MOMENTUM_DECAY = 0.0025;  /* lower = wheel coasts longer after a flick */
-
-  function frontIndexFor(offset) {
-    var best = 0, bestDist = Infinity;
-    cards.forEach(function (body, i) {
-      var theta = body.userData.baseAngle + offset;
-      var dist = Math.abs(shortestDelta(theta, SHOWCASE_ANGLE));
-      if (dist < bestDist) { bestDist = dist; best = i; }
-    });
-    return best;
-  }
-
-  function selectCard(i) {
-    var currentAngle = cards[i].userData.baseAngle + spinOffset;
-    var delta = shortestDelta(currentAngle, SHOWCASE_ANGLE);
-    if (reduceMotion) {
-      spinOffset += delta;
-      return;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var maxWidth = size * CONFIG.WORD_MAX_WIDTH_RATIO;
+    var fontSize = size * 0.34;
+    ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
+    while (ctx.measureText(word).width > maxWidth && fontSize > 10) {
+      fontSize -= 2;
+      ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
     }
-    momentumVelocity = 0;
-    snap = { startOffset: spinOffset, deltaTotal: delta, startTime: performance.now(), duration: 700 };
+    var ty = size / 2 + fontSize * 0.03;
+
+    ctx.shadowColor = CONFIG.COLOR_STRINGS.skyblue;
+    ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW;
+    ctx.fillStyle = CONFIG.COLOR_STRINGS.skyblue;
+    ctx.fillText(word, size / 2, ty);
+    ctx.fillText(word, size / 2, ty);
+
+    ctx.shadowColor = CONFIG.COLOR_STRINGS.white;
+    ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW * 0.4;
+    ctx.fillStyle = CONFIG.COLOR_STRINGS.white;
+    ctx.fillText(word, size / 2, ty);
+    ctx.shadowBlur = 0;
+    ctx.fillText(word, size / 2, ty);
+
+    var tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.needsUpdate = true;
+    return tex;
   }
 
+  /* ======================================================================
+     ANTI-OVERLAP SEPARATION
+  ====================================================================== */
+  function clampToBounds(pos, bounds) {
+    var b = bounds || CONFIG.DRAG_BOUNDS;
+    pos.x = THREE.MathUtils.clamp(pos.x, b.xMin, b.xMax);
+    pos.y = THREE.MathUtils.clamp(pos.y, b.yMin, b.yMax);
+    pos.z = THREE.MathUtils.clamp(pos.z, b.zMin, b.zMax);
+  }
+
+  function separationPass(items, iterations, minGap, strength) {
+    for (var iter = 0; iter < iterations; iter++) {
+      for (var i = 0; i < items.length; i++) {
+        for (var j = i + 1; j < items.length; j++) {
+          var a = items[i], b = items[j];
+          if (a.fixed && b.fixed) continue;
+
+          var dx = b.pos.x - a.pos.x;
+          var dy = b.pos.y - a.pos.y;
+          var dz = b.pos.z - a.pos.z;
+          var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          var minDist = a.radius + b.radius + minGap;
+          if (dist < minDist) {
+            if (dist < 1e-4) {
+              var ang = Math.random() * Math.PI * 2;
+              var elev = (Math.random() - 0.5) * Math.PI;
+              dx = Math.cos(ang) * Math.cos(elev);
+              dy = Math.sin(ang) * Math.cos(elev);
+              dz = Math.sin(elev);
+              dist = 1;
+            }
+            var nx = dx / dist, ny = dy / dist, nz = dz / dist;
+            var overlap = (minDist - dist) * strength;
+            if (a.fixed) {
+              b.pos.x += nx * overlap; b.pos.y += ny * overlap; b.pos.z += nz * overlap;
+            } else if (b.fixed) {
+              a.pos.x -= nx * overlap; a.pos.y -= ny * overlap; a.pos.z -= nz * overlap;
+            } else {
+              a.pos.x -= nx * overlap * 0.5; a.pos.y -= ny * overlap * 0.5; a.pos.z -= nz * overlap * 0.5;
+              b.pos.x += nx * overlap * 0.5; b.pos.y += ny * overlap * 0.5; b.pos.z += nz * overlap * 0.5;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* ======================================================================
+     BUILD COINS
+  ====================================================================== */
+  function buildCoins(logoImg) {
+    var capGradientTex = buildCapGradientTexture();
+    var wordColorTextures = {};
+    CONFIG.WORDS.forEach(function (w) { wordColorTextures[w] = buildWordColorTexture(w); });
+
+    var logoNormal = normalMapFromHeight(heightFromImage(logoImg, CONFIG.LOGO_SCALE));
+    var wordNormals = {};
+    CONFIG.WORDS.forEach(function (w) { wordNormals[w] = normalMapFromHeight(heightFromWord(w)); });
+
+    var deck = [];
+    for (var i = 0; i < CONFIG.COIN_COUNT; i++) {
+      deck.push({ word: CONFIG.WORDS[i % CONFIG.WORDS.length] });
+    }
+
+    var candidates = deck.map(function (def) {
+      var radius = THREE.MathUtils.lerp(CONFIG.COIN_RADIUS_MIN, CONFIG.COIN_RADIUS_MAX, Math.random());
+      var pos = new THREE.Vector3(
+        (Math.random() - 0.5) * CONFIG.COIN_SPREAD_X * 2,
+        (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Y * 2,
+        (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Z * 2
+      );
+      return { def: def, radius: radius, pos: pos, fixed: false };
+    });
+
+    for (var round = 0; round < 4; round++) {
+      separationPass(candidates, CONFIG.INITIAL_SEPARATION_ITERATIONS / 4, CONFIG.MIN_GAP, 1.0);
+      candidates.forEach(function (c) { clampToBounds(c.pos, CONFIG.LAYOUT_BOUNDS); });
+    }
+
+    var normalScaleVec = new THREE.Vector2(E.NORMAL_SCALE, E.NORMAL_SCALE);
+
+    candidates.forEach(function (c) {
+      var thickness = c.radius * CONFIG.COIN_THICKNESS_RATIO;
+      var geo = new THREE.CylinderGeometry(c.radius, c.radius, thickness, CONFIG.COIN_SEGMENTS);
+
+      var rimMat = new THREE.MeshPhysicalMaterial({
+        color: CONFIG.COLORS.navy,
+        metalness: CONFIG.MATERIAL.metalness,
+        roughness: CONFIG.MATERIAL.roughness,
+        clearcoat: CONFIG.MATERIAL.clearcoat,
+        clearcoatRoughness: CONFIG.MATERIAL.clearcoatRoughness,
+        envMap: envMap,
+        envMapIntensity: CONFIG.MATERIAL.envMapIntensity,
+        emissive: CONFIG.CLICK.GLOW_COLOR,
+        emissiveIntensity: 0,
+      });
+
+      var topNormal = wordNormals[c.def.word];
+      var topColorMap = wordColorTextures[c.def.word];
+      var bottomNormal = logoNormal;
+
+      var topMat = rimMat.clone();
+      topMat.map = topColorMap || capGradientTex;
+      topMat.color.set(0xffffff);
+      topMat.normalMap = topNormal;
+      topMat.normalScale = normalScaleVec;
+
+      var bottomMat = rimMat.clone();
+      bottomMat.map = capGradientTex;
+      bottomMat.color.set(0xffffff);
+      bottomMat.normalMap = bottomNormal;
+      bottomMat.normalScale = normalScaleVec;
+
+      var mesh = new THREE.Mesh(geo, [rimMat, topMat, bottomMat]);
+      mesh.position.copy(c.pos);
+      mesh.rotation.set(
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2
+      );
+
+      mesh.userData = {
+        radius: c.radius,
+        isDragging: false,
+        idleSpin: new THREE.Vector3(
+          (Math.random() - 0.5) * 2 * THREE.MathUtils.lerp(CONFIG.COIN_IDLE_SPIN_MIN, CONFIG.COIN_IDLE_SPIN_MAX, Math.random()),
+          (Math.random() - 0.5) * 2 * THREE.MathUtils.lerp(CONFIG.COIN_IDLE_SPIN_MIN, CONFIG.COIN_IDLE_SPIN_MAX, Math.random()),
+          (Math.random() - 0.5) * 2 * THREE.MathUtils.lerp(CONFIG.COIN_IDLE_SPIN_MIN, CONFIG.COIN_IDLE_SPIN_MAX, Math.random())
+        ),
+        flickSpin: new THREE.Vector3(0, 0, 0),
+        clickGlow: 0,
+      };
+
+      coinsGroup.add(mesh);
+    });
+  }
+
+  /* ======================================================================
+     DRAG + FLICK-TO-SPIN INTERACTION
+  ====================================================================== */
   var raycaster = new THREE.Raycaster();
-  var mouse = new THREE.Vector2();
-  var cardMeshes = cards.map(function (b) { return b.userData.cardMesh; });
+  var pointerNDC = new THREE.Vector2();
+  var dragState = null;
 
-  function setMouseFromEvent(e) {
-    var rect = renderer.domElement.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-  function pickCardAt(e) {
-    setMouseFromEvent(e);
-    raycaster.setFromCamera(mouse, camera);
-    var hits = raycaster.intersectObjects(cardMeshes, false);
-    if (!hits.length) return null;
-    return hits[0].object.userData.body;
+  function setPointerNDCFromEvent(evt) {
+    var rect = canvas.getBoundingClientRect();
+    pointerNDC.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNDC.y = -(((evt.clientY - rect.top) / rect.height) * 2 - 1);
   }
 
-  renderer.domElement.addEventListener('pointerdown', function (e) {
-    downPos = { x: e.clientX, y: e.clientY };
-    dragging = true;
-    snap = null;
-    momentumVelocity = 0;
-    dragVelocity = 0;
-    lastMoveX = e.clientX;
-    lastMoveTs = performance.now();
-    pointerId = e.pointerId;
-    try { renderer.domElement.setPointerCapture(pointerId); } catch (err) {}
-    renderer.domElement.style.cursor = 'grabbing';
-  });
+  function hitTestCoins() {
+    raycaster.setFromCamera(pointerNDC, camera);
+    return raycaster.intersectObjects(coinsGroup.children, false);
+  }
 
-  renderer.domElement.addEventListener('pointermove', function (e) {
-    if (!isTouch && !dragging) {
-      var hovered = pickCardAt(e);
-      renderer.domElement.style.cursor = hovered ? 'pointer' : 'grab';
-    }
-    if (!dragging) return;
-    var now = performance.now();
-    var dx = e.clientX - lastMoveX;
-    var dt = Math.max((now - lastMoveTs) / 1000, 1 / 120);
-    var angleDelta = dx * DRAG_SENSITIVITY;
-    spinOffset += angleDelta;
-    dragVelocity = angleDelta / dt;
-    lastMoveX = e.clientX;
-    lastMoveTs = now;
-  });
+  function onPointerDown(evt) {
+    if (evt.button !== undefined && evt.button !== 0) return;
+    setPointerNDCFromEvent(evt);
+    var hits = hitTestCoins();
+    if (hits.length === 0) return;
 
-  function endDrag(e) {
-    if (!dragging) return;
-    dragging = false;
-    renderer.domElement.style.cursor = 'grab';
-    if (pointerId !== null) {
-      try { renderer.domElement.releasePointerCapture(pointerId); } catch (err) {}
-      pointerId = null;
-    }
-    if (!downPos) return;
-    var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
-    downPos = null;
-    if (Math.sqrt(dx * dx + dy * dy) > 6) {
-      /* it was a drag, not a tap — hand off to momentum so the wheel
-         keeps coasting in the direction it was flung */
-      momentumVelocity = reduceMotion ? 0 : dragVelocity;
+    var coin = hits[0].object;
+    canvas.setPointerCapture(evt.pointerId);
+
+    var worldPos = new THREE.Vector3();
+    coin.getWorldPosition(worldPos);
+    var camDir = new THREE.Vector3();
+    camera.getWorldDirection(camDir);
+    var plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camDir, worldPos);
+    var grabOffset = new THREE.Vector3().subVectors(worldPos, hits[0].point);
+
+    coin.userData.isDragging = true;
+
+    dragState = {
+      coin: coin,
+      plane: plane,
+      grabOffset: grabOffset,
+      pointerId: evt.pointerId,
+      lastLocal: coin.position.clone(),
+      lastTime: performance.now(),
+      velocity: new THREE.Vector2(0, 0),
+      startClientX: evt.clientX,
+      startClientY: evt.clientY,
+      startTime: performance.now(),
+      moved: false,
+    };
+
+    canvas.classList.add('is-dragging');
+    evt.preventDefault();
+  }
+
+  function onPointerMove(evt) {
+    if (!dragState || evt.pointerId !== dragState.pointerId) {
+      setPointerNDCFromEvent(evt);
+      canvas.style.cursor = (!dragState && hitTestCoins().length) ? 'grab' : (dragState ? 'grabbing' : 'grab');
       return;
     }
-    var body = pickCardAt(e);
-    if (body) {
-      var idx = cards.indexOf(body);
-      if (idx >= 0) selectCard(idx);
+
+    if (!dragState.moved) {
+      var movedDist = Math.hypot(evt.clientX - dragState.startClientX, evt.clientY - dragState.startClientY);
+      if (movedDist > CONFIG.CLICK.MOVE_THRESHOLD_PX) dragState.moved = true;
+    }
+
+    setPointerNDCFromEvent(evt);
+    raycaster.setFromCamera(pointerNDC, camera);
+    var worldPoint = new THREE.Vector3();
+    var hit = raycaster.ray.intersectPlane(dragState.plane, worldPoint);
+    if (!hit) { evt.preventDefault(); return; }
+
+    worldPoint.add(dragState.grabOffset);
+    var localPoint = dragState.coin.parent.worldToLocal(worldPoint);
+    clampToBounds(localPoint);
+
+    var now = performance.now();
+    var dt = Math.max((now - dragState.lastTime) / 1000, 1 / 120);
+    dragState.velocity.set(
+      (localPoint.x - dragState.lastLocal.x) / dt,
+      (localPoint.y - dragState.lastLocal.y) / dt
+    );
+    dragState.lastLocal.copy(localPoint);
+    dragState.lastTime = now;
+
+    dragState.coin.position.copy(localPoint);
+
+    if (reducedMotion) renderOnce();
+    evt.preventDefault();
+  }
+
+  function triggerClickGlow(coin) {
+    coin.userData.clickGlow = 1.0;
+
+    if (reducedMotion) {
+      var steps = 0;
+      var tick = function () {
+        steps++;
+        coin.userData.clickGlow *= CONFIG.CLICK.GLOW_DECAY_STEP;
+        var intensity = coin.userData.clickGlow * CONFIG.CLICK.GLOW_PEAK_INTENSITY;
+        coin.material.forEach(function (mat) { mat.emissiveIntensity = intensity; });
+        renderOnce();
+        if (steps < 6 && coin.userData.clickGlow > 0.02) setTimeout(tick, 90);
+      };
+      coin.material.forEach(function (mat) { mat.emissiveIntensity = CONFIG.CLICK.GLOW_PEAK_INTENSITY; });
+      renderOnce();
+      setTimeout(tick, 90);
     }
   }
-  renderer.domElement.addEventListener('pointerup', endDrag);
-  renderer.domElement.addEventListener('pointercancel', function () {
-    dragging = false;
-    downPos = null;
-    if (pointerId !== null) {
-      try { renderer.domElement.releasePointerCapture(pointerId); } catch (err) {}
-      pointerId = null;
+
+  function onPointerUp(evt) {
+    if (!dragState || evt.pointerId !== dragState.pointerId) return;
+    var coin = dragState.coin;
+    coin.userData.isDragging = false;
+
+    var v = dragState.velocity;
+    var mult = CONFIG.DRAG_SPIN_MULTIPLIER;
+    coin.userData.flickSpin.x -= v.y * mult;
+    coin.userData.flickSpin.z += v.x * mult;
+    coin.userData.flickSpin.y += v.x * mult * 0.4;
+    coin.userData.flickSpin.clampScalar(-CONFIG.FLICK_SPIN_MAX, CONFIG.FLICK_SPIN_MAX);
+
+    var elapsed = performance.now() - dragState.startTime;
+    var wasTap = !dragState.moved && elapsed < CONFIG.CLICK.TIME_THRESHOLD_MS;
+    if (wasTap) {
+      triggerClickGlow(coin);
     }
+
+    dragState = null;
+    canvas.classList.remove('is-dragging');
+    canvas.style.cursor = 'grab';
+    if (reducedMotion) renderOnce();
+  }
+
+  canvas.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+
+  /* ======================================================================
+     POINTER-FOLLOW TILT (desktop / fine-pointer only, ambient parallax)
+  ====================================================================== */
+  var pointerTarget = { x: 0, y: 0 };
+  var pointerCurrent = { x: 0, y: 0 };
+
+  if (!isCoarsePointer && !reducedMotion) {
+    window.addEventListener('mousemove', function (e) {
+      if (dragState) return;
+      var nx = (e.clientX / window.innerWidth) * 2 - 1;
+      var ny = (e.clientY / window.innerHeight) * 2 - 1;
+      pointerTarget.x = ny * CONFIG.POINTER_TILT_MAX;
+      pointerTarget.y = nx * CONFIG.POINTER_TILT_MAX;
+    });
+  }
+
+  /* ======================================================================
+     INIT + ANIMATE
+  ====================================================================== */
+  var clock = new THREE.Clock();
+
+  function renderOnce() {
+    renderer.render(scene, camera);
+  }
+
+  Promise.all([
+    loadImage(ASSETS.logoWhite),
+    (document.fonts ? document.fonts.load(CONFIG.WORD_FONT_WEIGHT + ' 100px DM Sans').catch(function () { return null; }) : Promise.resolve(null)),
+    (document.fonts ? document.fonts.ready : Promise.resolve(null)),
+  ]).then(function (results) {
+    var logoImg = results[0];
+    buildCoins(logoImg);
+    resize();
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    if (reducedMotion) {
+      renderOnce();
+      return;
+    }
+    animate();
   });
 
-  function onResize() {
-    width = stage.clientWidth;
-    height = stage.clientHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-  }
-  window.addEventListener('resize', onResize);
-
-  var lastTs = null;
-
-  function animate(ts) {
+  function animate() {
     requestAnimationFrame(animate);
-    if (lastTs === null) lastTs = ts;
-    var dt = (ts - lastTs) / 1000;
-    lastTs = ts;
+    var t = clock.getElapsedTime();
 
-    if (dragging) {
-      /* spinOffset is already being driven directly by pointermove */
-    } else if (snap) {
-      var p = Math.min(Math.max((ts - snap.startTime) / snap.duration, 0), 1);
-      var ep = easeOutCubic(p);
-      spinOffset = snap.startOffset + snap.deltaTotal * ep;
-      if (p >= 1) snap = null;
-    } else if (Math.abs(momentumVelocity) > 0.001) {
-      spinOffset += momentumVelocity * dt;
-      var friction = Math.exp(-MOMENTUM_DECAY * dt * 1000);
-      momentumVelocity *= friction;
-      if (Math.abs(momentumVelocity) <= 0.001) momentumVelocity = 0;
-    } else {
-      spinOffset += SPIN_SPEED * dt;
-    }
+    coinsGroup.children.forEach(function (mesh) {
+      var d = mesh.userData;
+      mesh.rotation.x += (d.idleSpin.x + d.flickSpin.x) * 0.016;
+      mesh.rotation.y += (d.idleSpin.y + d.flickSpin.y) * 0.016;
+      mesh.rotation.z += (d.idleSpin.z + d.flickSpin.z) * 0.016;
+      d.flickSpin.multiplyScalar(CONFIG.FLICK_SPIN_DECAY);
 
-    cards.forEach(function (body) {
-      var theta = body.userData.baseAngle + spinOffset;
-      var rotY = theta + CAM_ALIGN;
-      var radialX = Math.cos(rotY);
-      var radialZ = -Math.sin(rotY);
-      body.rotation.y = rotY;
-      body.position.x = radialX * RADIUS;
-      body.position.z = radialZ * RADIUS;
+      if (d.clickGlow > 0.001) {
+        d.clickGlow *= CONFIG.CLICK.GLOW_DECAY;
+        var intensity = d.clickGlow * CONFIG.CLICK.GLOW_PEAK_INTENSITY;
+        mesh.material.forEach(function (mat) { mat.emissiveIntensity = intensity; });
+      } else if (d.clickGlow !== 0) {
+        d.clickGlow = 0;
+        mesh.material.forEach(function (mat) { mat.emissiveIntensity = 0; });
+      }
     });
 
-    var frontIndex = frontIndexFor(spinOffset);
-    if (frontIndex !== lastFrontIndex) {
-      if (lastFrontIndex >= 0) setCardStyle(cards[lastFrontIndex], false);
-      setCardStyle(cards[frontIndex], true);
-      lastFrontIndex = frontIndex;
-    }
-    cards.forEach(function (body, i) {
-      var targetScale = i === frontIndex ? 1.08 : 1;
-      body.scale.x += (targetScale - body.scale.x) * 0.15;
-      body.scale.y += (targetScale - body.scale.y) * 0.15;
-      body.scale.z += (targetScale - body.scale.z) * 0.15;
-
-      var liftTarget = i === frontIndex ? RISE_HEIGHT : 0;
-      var liftSpeed = liftTarget > body.userData.liftY ? 0.22 : 0.07;
-      body.userData.liftY += (liftTarget - body.userData.liftY) * liftSpeed;
-      body.position.y = body.userData.liftY;
+    var items = coinsGroup.children.map(function (m) {
+      return { pos: m.position, radius: m.userData.radius, fixed: m.userData.isDragging };
     });
+    separationPass(items, CONFIG.LIVE_SEPARATION_ITERATIONS, CONFIG.MIN_GAP, CONFIG.LIVE_SEPARATION_STRENGTH);
+    coinsGroup.children.forEach(function (m) { if (!m.userData.isDragging) clampToBounds(m.position); });
+
+    cluster.rotation.y = t * CONFIG.CLUSTER_SPIN_SPEED_Y;
+    cluster.rotation.x = CONFIG.CLUSTER_BASE_TILT_X;
+
+    pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * CONFIG.POINTER_TILT_EASE;
+    pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * CONFIG.POINTER_TILT_EASE;
+    cluster.rotation.x += pointerCurrent.x;
+    cluster.rotation.y += pointerCurrent.y;
 
     renderer.render(scene, camera);
   }
 
-  requestAnimationFrame(animate);
 })();
 </script>
 
