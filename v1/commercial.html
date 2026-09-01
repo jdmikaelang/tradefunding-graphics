@@ -861,7 +861,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
      top-down view read as a thin asterisk ray). */
   var BLADE_LEN = 1.7, BLADE_H = 1.7, BLADE_R = 0.08;
   var CENTER_GAP = 0.24; /* clearance between inner blade edges at the hub */
-  var RISE_HEIGHT = 0.65; /* how far the front/selected card lifts */
+  var RISE_HEIGHT = 0.42; /* how far the front/selected card lifts */
   var cardShape = roundedRectShape(BLADE_LEN, BLADE_H, BLADE_R);
   var cardGeo = new THREE.ExtrudeGeometry(cardShape, {
     depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3
