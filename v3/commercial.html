@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Funding — Business Loans, Compared</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<style>
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:var(--bg-soft);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--skyblue);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--skyblue);border:3px solid #fff;cursor:pointer}
+
+.hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;align-content:center}
+.hero-title{font-size:clamp(2.4rem,4vw,3.4rem);font-weight:600;letter-spacing:var(--ls-heading);line-height:1.08;color:var(--navy);margin:0 0 16px}
+.hero-sub{font-size:1.08rem;color:var(--text-secondary);line-height:1.6;margin:0 0 28px;max-width:440px}
+.hero-tags{display:flex;gap:20px;flex-wrap:wrap}
+.hero-tags span{font-family:var(--font-heading);font-size:0.78rem;font-weight:500;color:var(--text-secondary)}
+
+.compare-row{display:grid;grid-template-columns:1.6fr 0.8fr 0.9fr auto;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed rgba(0,28,68,0.12)}
+.compare-head-row{display:grid;grid-template-columns:1.6fr 0.8fr 0.9fr auto;gap:12px;font-family:var(--font-heading);font-size:0.58rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);padding:8px 0;border-bottom:2px solid #e0e4ea}
+.lender-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.stage-circle{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);color:var(--ink-400);margin:0 auto 14px}
+.stage-track{display:flex;align-items:flex-start;justify-content:center;gap:0;max-width:760px;margin:0 auto}
+.stage-col{display:flex;flex-direction:column;align-items:center;gap:14px;width:200px}
+.stage-connector{width:80px;height:2px;background:var(--border-dashed);margin-top:39px}
+.stage-dots{display:flex;justify-content:center;gap:8px;margin-top:36px}
+.stage-dot{width:8px;height:8px;border-radius:50%;background:var(--ink-200)}
+@keyframes tf-stage-pulse{0%,33%{background:var(--navy);color:#fff;box-shadow:0 8px 24px rgba(0,28,68,0.25);transform:scale(1.06)}34%,100%{background:var(--bg-soft);color:var(--ink-400);box-shadow:none;transform:scale(1)}}
+.stage-1{animation:tf-stage-pulse 7.8s infinite}
+.stage-2{animation:tf-stage-pulse 7.8s infinite;animation-delay:2.6s}
+.stage-3{animation:tf-stage-pulse 7.8s infinite;animation-delay:5.2s}
+
+.process-line{position:absolute;top:20px;left:calc(16.66% + 20px);right:calc(16.66% + 20px);height:2px;background:var(--border-dashed);z-index:0}
+.process-num{width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:0.95rem}
+.process-inner-card{background:#fff;border-radius:var(--radius-md);border:1px solid var(--border);padding:14px;box-shadow:var(--shadow-sm)}
+.deal-bar-track{height:6px;background:var(--bg-soft);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.deal-bar-fill{height:100%;background:var(--navy);border-radius:3px;animation:tf-deal-fill 7.8s infinite}
+@keyframes tf-deal-fill{0%{width:33%}45%{width:66%}90%,100%{width:100%}}
+
+.star-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.star-badge{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;font-family:var(--font-heading);font-weight:700;font-size:1.05rem;margin-bottom:12px}
+
+.product-card{background:#fff;border:1px solid var(--border);border-top:3px solid var(--skyblue);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:26px}
+
+.testimonial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.testimonial-card{background:var(--bg-soft);border-radius:var(--radius-lg);padding:22px}
+.stars{color:var(--gold);letter-spacing:2px;font-size:0.85rem}
+
+.product-wheel-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.scene-stage{position:relative;height:460px;overflow:visible}
+.scene-stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+.scene-stage canvas:active{cursor:grabbing}
+.scene-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--text-secondary);pointer-events:none}
+
+@media (max-width: 900px){
+  .hero-grid{grid-template-columns:1fr}
+  .star-grid,.testimonial-grid{grid-template-columns:repeat(2,1fr)}
+  .compare-head-row,.compare-row{grid-template-columns:1.4fr 0.7fr 0.8fr auto}
+  .product-wheel-grid{grid-template-columns:1fr}
+  .scene-stage{height:320px}
+}
+</style>
+</head>
+<body class="channel-commercial">
+
+<!-- NAVBAR -->
+<nav class="tf-nav" aria-label="Primary">
+<div class="tf-nav-inner">
+<a href="index.html" class="tf-nav-logo"><img src="assets/img/logo-navy.png" alt="Trade Funding"></a>
+<div class="tf-nav-links">
+<div class="tf-nav-item">
+<span class="tf-nav-link">Products<span class="tf-caret" aria-hidden="true"></span></span>
+<div class="tf-mega-panel tf-mega-panel-wide">
+<div class="tf-mega-wide-inner">
+<a href="commercial/products/index.html" class="tf-mega-wide-lead">All business loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<div class="tf-mega-wide-grid">
+<div class="tf-mega-wide-col">
+<div>
+<span class="tf-mega-wide-group-label">Term Loans</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/business-term-loans/index.html" class="tf-mega-wide-link">Term Loan<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/merchant-cash-advance/index.html" class="tf-mega-wide-link">Merchant Cash Advance<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/r-and-d-funding/index.html" class="tf-mega-wide-link">R&amp;D Funding<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div>
+<span class="tf-mega-wide-group-label">Other</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/products/index.html" class="tf-mega-wide-link">View all business loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<div>
+<span class="tf-mega-wide-group-label">Credit Lines</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/charge-card/index.html" class="tf-mega-wide-link">Charge Card<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/business-line-of-credit/index.html" class="tf-mega-wide-link">Line of Credit<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/overdraft/index.html" class="tf-mega-wide-link">Overdraft<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div>
+<span class="tf-mega-wide-group-label">Company</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/guides/index.html" class="tf-mega-wide-link">Guides &amp; Resources<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="home-shared/about/index.html" class="tf-mega-wide-link">About Us<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<div>
+<span class="tf-mega-wide-group-label">Invoice</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/invoice-finance/index.html" class="tf-mega-wide-link">Invoice Finance<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/fund-an-invoice/index.html" class="tf-mega-wide-link">Fund an Invoice<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div>
+<span class="tf-mega-wide-group-label">Personal &amp; Property</span>
+<div class="tf-mega-wide-links">
+<a href="personal-and-property/second-mortgage/index.html" class="tf-mega-wide-link">Second Mortgage<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/self-employed-home-loans/index.html" class="tf-mega-wide-link">Self-Employed Home Loan<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property.html" class="tf-mega-wide-link">All Personal &amp; Property loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Trade</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/trade-finance/index.html" class="tf-mega-wide-link">Trade Finance<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/export-finance/index.html" class="tf-mega-wide-link">Export Finance<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/supply-chain-funding/index.html" class="tf-mega-wide-link">Supply Chain Funding<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Equipment</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/finance-lease/index.html" class="tf-mega-wide-link">Finance Lease<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/operating-lease/index.html" class="tf-mega-wide-link">Operating Lease<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/chattel-mortgage/index.html" class="tf-mega-wide-link">Chattel Mortgage<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+<div class="tf-mega-wide-foot">
+<a href="commercial/compare-report/index.html" class="tf-mega-wide-link">Not sure which product?<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+</div>
+<div class="tf-nav-item">
+<span class="tf-nav-link">Compare<span class="tf-caret" aria-hidden="true"></span></span>
+<div class="tf-mega-panel tf-mega-panel-wide">
+<div class="tf-mega-wide-inner">
+<a href="commercial/compare-report/index.html" class="tf-mega-wide-lead">Compare your options<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<div class="tf-mega-wide-grid tf-mega-wide-grid-compact">
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Compare</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/compare-report/index.html" class="tf-mega-wide-link">Compare Report<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/meet-cashper/index.html" class="tf-mega-wide-link">Meet Cashper<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Calculators</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/repayment-calculator/index.html" class="tf-mega-wide-link">Repayment Calculator<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/equipment-calculator/index.html" class="tf-mega-wide-link">Equipment Finance Calculator<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<a href="home-shared/about/index.html" class="tf-nav-link">About</a>
+</div>
+<nav class="tf-toggle" aria-label="Switch Trade Funding channel">
+<a href="index.html" class="tf-toggle-home" aria-label="Home">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"></path></svg>
+</a>
+<a href="commercial.html" class="tf-toggle-tab is-active">Commercial</a>
+<a href="connect.html" class="tf-toggle-tab">Connect</a>
+<a href="personal-and-property.html" class="tf-toggle-tab">Personal &amp; Property</a>
+</nav>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-grid" style="min-height:var(--hero-min-h);box-sizing:border-box;padding:var(--section-y) 0">
+<div>
+<h1 class="hero-title">Funding that actually fits your business.</h1>
+<p class="hero-sub">Compare 70+ lenders in minutes. No credit check.</p>
+<div class="hero-tags">
+<span>No credit check</span><span>No commitment</span><span>24hr turnaround</span>
+</div>
+</div>
+
+<div class="scene-stage" id="hero-scene-stage">
+<div class="scene-loading" id="hero-scene-loading">Loading&hellip;</div>
+</div>
+</section>
+
+<!-- PROOF BAR -->
+<section style="background:#fff;padding:var(--section-y) 0;text-align:center">
+<div class="container">
+<span class="eyebrow" style="text-align:center">How it works</span>
+<h2 class="section-title" style="margin-bottom:56px">From ABN to ranked offers. Automatically.</h2>
+<div class="stage-track">
+<div class="stage-col"><div class="stage-circle stage-1"><span style="font-family:'DM Sans',monospace;font-weight:700;font-size:1.05rem">01</span></div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.95rem;color:var(--navy)">Input</div><div style="font-size:0.8rem;color:var(--text-secondary)">ABN + a few business details</div></div>
+<div class="stage-connector"></div>
+<div class="stage-col"><div class="stage-circle stage-2"><span style="font-family:'DM Sans',monospace;font-weight:700;font-size:1.05rem">02</span></div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.95rem;color:var(--navy)">Cashper Scoring</div><div style="font-size:0.8rem;color:var(--text-secondary)">Matched against real lender policy</div></div>
+<div class="stage-connector"></div>
+<div class="stage-col"><div class="stage-circle stage-3"><span style="font-family:'DM Sans',monospace;font-weight:700;font-size:1.05rem">03</span></div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.95rem;color:var(--navy)">Output</div><div style="font-size:0.8rem;color:var(--text-secondary)">Ranked, pre-qualified offers</div></div>
+</div>
+</div>
+</section>
+
+<!-- PROCESS STEPS -->
+<section style="background:var(--bg-soft);padding:var(--section-y) 0">
+<div class="container">
+<h2 class="section-title" style="text-align:center;margin-bottom:8px">We don't stop at the report</h2>
+<div class="rule"></div>
+<div class="process-grid" style="margin-top:56px">
+<div class="process-line"></div>
+<div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:16px">
+<div class="process-num">01</div>
+<h3 style="font-weight:700;font-size:1.08rem;color:var(--navy)">Your personalised Compare Report</h3>
+<p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.55">Every offer scored. Every fact laid out.</p>
+<div class="process-inner-card">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:var(--font-heading);font-weight:600;font-size:0.78rem;color:var(--text-secondary)">Overall Score</span><span style="font-family:var(--font-heading);font-weight:700;font-size:1.1rem;color:var(--navy)">8.6</span></div>
+<div style="height:6px;background:var(--bg-soft);border-radius:3px;overflow:hidden;margin-top:10px"><div style="width:86%;height:100%;background:var(--skyblue)"></div></div>
+</div>
+</div>
+<div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:16px">
+<div class="process-num">02</div>
+<h3 style="font-weight:700;font-size:1.08rem;color:var(--navy)">We walk you through it</h3>
+<p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.55">Your specialist explains the trade-offs — plain English.</p>
+<div class="process-inner-card">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-family:var(--font-heading);font-weight:700;font-size:0.78rem;color:var(--navy)">Judo Bank &bull; Term Loan</span><span style="display:inline-flex;gap:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--star-s)"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--star-t)"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--star-a)"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--star-r)"></span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--tint-sky-10);border-radius:8px;margin-bottom:8px"><span style="font-family:var(--font-heading);font-weight:600;font-size:0.76rem;color:var(--navy)">9.45% p.a.</span><span style="font-family:var(--font-heading);font-weight:700;font-size:0.76rem;color:var(--navy)">Score 8.6</span></div>
+<div style="background:var(--bg-soft);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.8rem;color:var(--text-secondary);line-height:1.5">Specialist note: lowest rate, but needs a director's guarantee.</div>
+</div>
+</div>
+<div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:16px">
+<div class="process-num">03</div>
+<h3 style="font-weight:700;font-size:1.08rem;color:var(--navy)">We close the deal</h3>
+<p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.55">Applications, negotiation, settlement. You focus on the business.</p>
+<div class="process-inner-card">
+<div class="deal-bar-track"><div class="deal-bar-fill"></div></div>
+<div style="display:flex;justify-content:space-between;gap:6px;font-family:var(--font-heading);font-weight:600;font-size:0.76rem;color:var(--navy)">
+<span>Applications</span><span>Negotiation</span><span>Settlement</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- S.T.A.R. -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+<div>
+<span class="eyebrow">What you get</span>
+<h2 class="section-title" style="margin-bottom:28px">See the facts. Decide with confidence.</h2>
+<div class="star-grid">
+<div class="card" style="padding:22px"><span class="star-badge" style="background:var(--tint-navy-blue-10);color:var(--star-s)">S</span><h4 style="font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:6px">Security</h4><p style="font-size:0.84rem;color:var(--text-secondary);line-height:1.5">No collateral, guarantee-only, or secured — know your exposure upfront.</p></div>
+<div class="card" style="padding:22px"><span class="star-badge" style="background:var(--tint-sky-10);color:var(--star-t)">T</span><h4 style="font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:6px">Term</h4><p style="font-size:0.84rem;color:var(--text-secondary);line-height:1.5">3 months to 30 years, compared side by side.</p></div>
+<div class="card" style="padding:22px"><span class="star-badge" style="background:var(--tint-gold-10);color:var(--star-a)">A</span><h4 style="font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:6px">Amount</h4><p style="font-size:0.84rem;color:var(--text-secondary);line-height:1.5">See exactly what each lender will offer, and why.</p></div>
+<div class="card" style="padding:22px"><span class="star-badge" style="background:var(--tint-peach-10);color:var(--star-r)">R</span><h4 style="font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:6px">Rate</h4><p style="font-size:0.84rem;color:var(--text-secondary);line-height:1.5">Simple, transparent, apples-to-apples.</p></div>
+</div>
+</div>
+<div class="card" style="box-shadow:var(--shadow-lg);overflow:hidden">
+<div style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eaedf2">
+<div style="font-family:var(--font-heading);font-weight:700;font-size:0.88rem;color:var(--navy)">Compare Report &bull; Sample</div>
+<span style="font-family:var(--font-heading);font-weight:700;font-size:0.64rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--success);background:var(--tint-success-12);padding:4px 10px;border-radius:var(--radius-pill)">Best Match</span>
+</div>
+<div style="padding:4px 20px 0">
+<div class="compare-head-row"><span>Lender</span><span style="text-align:right">Rate</span><span style="text-align:right">Amount</span><span style="text-align:right">Score</span></div>
+<div class="compare-row"><div style="display:flex;align-items:center;gap:10px"><span class="lender-dot" style="background:var(--success)"></span><div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.85rem;color:var(--navy)">Judo Bank</div><div style="font-size:0.7rem;color:var(--text-secondary)">Term Loan</div></div></div><div style="text-align:right;font-family:var(--font-heading);font-weight:700;font-size:0.9rem;color:var(--navy-blue)">9.45%</div><div style="text-align:right;font-family:var(--font-heading);font-weight:600;font-size:0.85rem;color:var(--navy)">$250,000</div><div style="display:flex;justify-content:flex-end;gap:6px;align-items:center"><span style="font-family:var(--font-heading);font-weight:700;font-size:0.8rem;color:var(--navy)">8.6</span></div></div>
+<div class="compare-row" style="border-bottom:none"><div style="display:flex;align-items:center;gap:10px"><span class="lender-dot" style="background:var(--skyblue)"></span><div><div style="font-family:var(--font-heading);font-weight:600;font-size:0.85rem;color:var(--navy)">Grow Finance</div><div style="font-size:0.7rem;color:var(--text-secondary)">Line of Credit</div></div></div><div style="text-align:right;font-family:var(--font-heading);font-weight:700;font-size:0.9rem;color:var(--navy-blue)">11.20%</div><div style="text-align:right;font-family:var(--font-heading);font-weight:600;font-size:0.85rem;color:var(--navy)">$180,000</div><div style="display:flex;justify-content:flex-end;gap:6px;align-items:center"><span style="font-family:var(--font-heading);font-weight:700;font-size:0.8rem;color:var(--navy)">8.1</span></div></div>
+</div>
+<div style="padding:14px 20px;background:var(--bg-soft);border-top:1px solid #eaedf2;font-size:0.68rem;color:var(--text-secondary);font-style:italic">Sample &bull; Your report is personalised against your ABN</div>
+</div>
+</div>
+</section>
+
+<!-- PRODUCT GRID -->
+<section id="business-loans" style="background:var(--light-bg);padding:var(--section-y) 0">
+<div class="container">
+<div style="text-align:center;margin-bottom:44px"><span class="eyebrow" style="text-align:center">Funding Solutions</span><h2 class="section-title">Every kind of business finance, in one place</h2><div class="rule"></div></div>
+<div class="process-grid grid-3" style="position:static">
+<div class="product-card"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Business Loans</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Fixed or flexible terms for growth, stock or cashflow.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">$10k – $5M</p><a href="commercial/products/index.html#term-loans" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See loan options &rarr;</a></div>
+<div class="product-card" id="lines-of-credit"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Lines of Credit</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Draw what you need, pay interest only on what you use.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">Redraw anytime</p><a href="commercial/products/index.html#credit-lines" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See credit options &rarr;</a></div>
+<div class="product-card" id="invoice-finance" style="border-top-color:var(--peach)"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Invoice Finance</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Turn unpaid invoices into working capital in days.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">Up to 90% advance</p><a href="commercial/products/index.html#invoice" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See invoice options &rarr;</a></div>
+<div class="product-card" id="trade-finance" style="border-top-color:var(--gold)"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Trade Finance</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Fund stock and supplier payments across the supply chain.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">70+ lenders</p><a href="commercial/products/index.html#trade" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See trade options &rarr;</a></div>
+<div class="product-card" id="equipment-leasing" style="border-top-color:var(--navy-blue)"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Equipment &amp; Leasing</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Chattel mortgage, finance lease or operating lease.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">New or used assets</p><a href="commercial/products/index.html#equipment" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See equipment options &rarr;</a></div>
+<div class="product-card" id="commercial-mortgages"><h3 style="font-weight:700;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Commercial Mortgages</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Purchase or refinance the property your business runs from.</p><p style="font-family:var(--font-heading);font-weight:700;font-size:0.86rem;color:var(--navy);margin-bottom:12px">Terms to 30 years</p><a href="personal-and-property/commercial-property/index.html" style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">See mortgage options &rarr;</a></div>
+</div>
+</div>
+</section>
+
+<!-- LENDER PANEL -->
+<section style="background:#fff;padding:var(--section-y) 0;text-align:center">
+<div class="container">
+<span class="eyebrow" style="text-align:center">Our lender panel</span>
+<h2 class="section-title" style="font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:40px">70+ of Australia's leading lenders. One place to compare them.</h2>
+<div class="lender-strip">
+<img class="lender-logo" src="assets/img/lenders/anz.svg" alt="ANZ">
+<img class="lender-logo" src="assets/img/lenders/cba.svg" alt="CBA">
+<img class="lender-logo" src="assets/img/lenders/nab.svg" alt="NAB">
+<img class="lender-logo" src="assets/img/lenders/westpac.svg" alt="Westpac">
+<img class="lender-logo" src="assets/img/lenders/judo-bank.svg" alt="Judo Bank">
+<img class="lender-logo" src="assets/img/lenders/prospa.svg" alt="Prospa">
+<img class="lender-logo" src="assets/img/lenders/shift.svg" alt="Shift">
+<img class="lender-logo" src="assets/img/lenders/banjo-loans.svg" alt="Banjo Loans">
+<img class="lender-logo" src="assets/img/lenders/bizcap.svg" alt="Bizcap">
+<img class="lender-logo" src="assets/img/lenders/lumi.svg" alt="Lumi">
+<img class="lender-logo" src="assets/img/lenders/butn.svg" alt="Butn">
+<img class="lender-logo" src="assets/img/lenders/earlypay.svg" alt="Earlypay">
+</div>
+</div>
+</section>
+
+<!-- PRODUCT WHEEL -->
+<section style="background:var(--bg-soft);padding:var(--section-y) 0">
+<div class="container product-wheel-grid">
+<div>
+<span class="eyebrow">Funding Solutions</span>
+<h2 class="section-title" style="margin-bottom:16px">Six ways to fund it. One place to pick.</h2>
+<p style="font-size:0.95rem;color:var(--text-secondary);line-height:1.65;max-width:420px">Spin through every commercial product we compare — click a card to see it up close.</p>
+</div>
+<div class="scene-stage" id="product-scene-stage">
+<div class="scene-loading" id="product-scene-loading">Loading&hellip;</div>
+</div>
+</div>
+</section>
+
+<!-- GUIDES -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container">
+<div style="text-align:center;margin-bottom:44px"><span class="eyebrow" style="text-align:center">Resources</span><h2 class="section-title">Learn before you apply.</h2></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:22px">
+<div style="background:var(--light-bg);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;justify-content:center">
+<span style="font-family:var(--font-heading);font-weight:700;font-size:0.7rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--skyblue);margin-bottom:10px;display:block">Featured guide</span>
+<h3 style="font-weight:700;font-size:1.3rem;color:var(--navy);margin-bottom:10px">How to compare a business loan offer</h3>
+<p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">Rates, fees, terms — what lenders actually look for.</p>
+<span style="font-family:var(--font-heading);font-weight:600;font-size:0.85rem;color:var(--ink-400);cursor:default">Read the guide &rarr;</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<span class="card" style="display:block;padding:16px 18px;font-family:var(--font-heading);font-weight:600;font-size:0.9rem;color:var(--ink-400);cursor:default">Invoice finance, explained</span>
+<span class="card" style="display:block;padding:16px 18px;font-family:var(--font-heading);font-weight:600;font-size:0.9rem;color:var(--ink-400);cursor:default">When refinancing makes sense</span>
+<span class="card" style="display:block;padding:16px 18px;font-family:var(--font-heading);font-weight:600;font-size:0.9rem;color:var(--ink-400);cursor:default">R&amp;D tax incentive funding</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CASE STUDIES -->
+<section style="background:var(--light-bg);padding:var(--section-y) 0">
+<div class="container">
+<h2 class="section-title" style="text-align:center;margin-bottom:44px">Real businesses. Real results.</h2>
+<div class="process-grid grid-3" style="position:static">
+<div class="card" style="padding:26px"><span style="font-family:var(--font-heading);font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--text-secondary)">E-commerce &bull; Sydney</span><div style="font-family:var(--font-heading);font-weight:700;font-size:1.8rem;color:var(--navy);margin:8px 0">$250k</div><p style="font-size:0.86rem;color:var(--text-secondary);margin-bottom:10px">Term Loan</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--success)">Funded in 5 days</span></div>
+<div class="card" style="padding:26px"><span style="font-family:var(--font-heading);font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--text-secondary)">Construction &bull; Melbourne</span><div style="font-family:var(--font-heading);font-weight:700;font-size:1.8rem;color:var(--navy);margin:8px 0">$480k</div><p style="font-size:0.86rem;color:var(--text-secondary);margin-bottom:10px">Equipment Finance</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--success)">Funded in 3 days</span></div>
+<div class="card" style="padding:26px"><span style="font-family:var(--font-heading);font-weight:600;font-size:0.72rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--text-secondary)">Healthcare &bull; Brisbane</span><div style="font-family:var(--font-heading);font-weight:700;font-size:1.8rem;color:var(--navy);margin:8px 0">$120k</div><p style="font-size:0.86rem;color:var(--text-secondary);margin-bottom:10px">Line of Credit</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--success)">Funded in 24hrs</span></div>
+</div>
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container">
+<h2 class="section-title" style="text-align:center;margin-bottom:44px">What business owners say</h2>
+<div class="testimonial-grid">
+<div class="testimonial-card"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><p style="font-size:0.92rem;color:var(--navy);line-height:1.6;margin:10px 0">"[Placeholder review — swap in a real customer quote about turnaround time.]"</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--text-secondary)">Business Owner, Retail</span></div>
+<div class="testimonial-card"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><p style="font-size:0.92rem;color:var(--navy);line-height:1.6;margin:10px 0">"[Placeholder review — swap in a real customer quote about the S.T.A.R. report experience.]"</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--text-secondary)">Business Owner, Construction</span></div>
+<div class="testimonial-card"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><p style="font-size:0.92rem;color:var(--navy);line-height:1.6;margin:10px 0">"[Placeholder review — short quote.]"</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.8rem;color:var(--text-secondary)">Business Owner, Hospitality</span></div>
+</div>
+</div>
+</section>
+
+<!-- FINAL CTA -->
+<section style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-blue) 100%);padding:var(--section-y) 0;text-align:center;color:#fff">
+<div class="container-prose">
+<span style="display:inline-flex;align-items:center;padding:6px 14px;border-radius:var(--radius-pill);font-family:var(--font-heading);font-weight:600;font-size:0.72rem;letter-spacing:var(--ls-label);text-transform:uppercase;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15)">No credit check</span>
+<h2 class="section-title" style="color:#fff;margin:18px 0 14px">Ready to see the full picture?</h2>
+<p style="color:rgba(255,255,255,0.75);margin-bottom:28px;font-size:1.02rem">Your personalised Compare Report — ready in 24 hours.</p>
+<a href="home-shared/apply/index.html" class="btn" style="background:#D63838;color:#fff;box-shadow:var(--shadow-peach);padding:16px 32px">Get My Free Compare Report &rarr;</a>
+<div style="display:flex;gap:20px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+<span style="font-family:var(--font-heading);font-size:0.78rem;font-weight:500;color:rgba(255,255,255,0.8)">No credit check</span>
+<span style="font-family:var(--font-heading);font-size:0.78rem;font-weight:500;color:rgba(255,255,255,0.8)">No commitment</span>
+<span style="font-family:var(--font-heading);font-size:0.78rem;font-weight:500;color:rgba(255,255,255,0.8)">Ready in 24hrs</span>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="tf-footer">
+<div class="container-wide">
+<div class="tf-footer-top">
+<div>
+<img src="assets/img/logo-white.png" alt="Trade Funding" style="height:20px;width:auto;display:block;margin-bottom:16px;">
+<p class="tf-footer-blurb">Australia's lending intelligence platform. We pre-qualify your business against 70+ lenders so you know your options before you apply.</p>
+<div class="tf-footer-contact">
+<a href="tel:1300161641">1300 161 641</a>
+<a href="mailto:support@tradefunding.com.au">support@tradefunding.com.au</a>
+<span>Level 8, 387 George Street, Sydney, NSW, 2000</span>
+</div>
+<div class="tf-footer-badges">
+<span class="tf-footer-badge">ACL 387856</span>
+<span class="tf-footer-badge">AFCA Member</span>
+<span class="tf-footer-badge">CAFBA</span>
+<span class="tf-footer-badge">Fintech Australia</span>
+</div>
+</div>
+<div class="tf-footer-cols">
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Channels</div>
+<a href="commercial.html">Business Loans</a>
+<a href="connect.html">Connect</a>
+<a href="personal-and-property.html">Personal &amp; Property</a>
+<a href="commercial/guides/index.html">Guides &amp; Tools</a>
+</div>
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Company</div>
+<a href="home-shared/about/index.html">About Us</a>
+<a href="home-shared/broker-portal/index.html">Broker Portal</a>
+<a href="connect.html">Become a Partner</a>
+<a href="home-shared/contact/index.html">Contact</a>
+<a href="home-shared/apply/index.html">Get Started</a>
+</div>
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Legal</div>
+<a href="home-shared/credit-guide/index.html">Credit Guide</a>
+<a href="home-shared/privacy/index.html">Privacy Policy</a>
+<a href="home-shared/terms/index.html">Terms &amp; Conditions</a>
+</div>
+</div>
+</div>
+<div class="tf-footer-legal">
+<p>Credit products are provided by third-party lenders and credit offers are subject to a full credit review. Read our <a href="home-shared/credit-guide/index.html" style="color:rgba(255,255,255,0.85)">Credit Guide</a> | <a href="home-shared/terms/index.html" style="color:rgba(255,255,255,0.85)">Terms &amp; Conditions</a> | ACL 387856</p>
+</div>
+<div class="tf-footer-bottom">
+<span>&copy; 2026 Trade Funding Pty Ltd. All rights reserved.</span>
+</div>
+</div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var NAVY = 0x001C44;
+  var BLUE = 0x54B4F6;
+
+  var PRODUCTS = [
+    { label: "Business Loans", href: "products/index.html#term-loans" },
+    { label: "Lines of Credit", href: "products/index.html#credit-lines" },
+    { label: "Invoice Finance", href: "products/index.html#invoice" },
+    { label: "Trade Finance", href: "products/index.html#trade" },
+    { label: "Equipment & Leasing", href: "products/index.html#equipment" },
+    { label: "Commercial Mortgages", href: "../personal-and-property/commercial-property/index.html" }
+  ];
+
+  var stage = document.getElementById('product-scene-stage');
+  var loadingEl = document.getElementById('product-scene-loading');
+  if (!stage) return;
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isTouch = 'ontouchstart' in window;
+
+  if (!window.THREE) {
+    loadingEl.textContent = 'Could not load 3D library.';
+    return;
+  }
+  loadingEl.style.display = 'none';
+
+  var width = stage.clientWidth;
+  var height = stage.clientHeight;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
+  camera.position.set(0, 0.35, 6.3);
+  camera.lookAt(0, 0.15, 0);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  stage.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xdbe7f5, 0.95));
+  var keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  keyLight.position.set(4, 6, 5);
+  scene.add(keyLight);
+  var fillLight = new THREE.DirectionalLight(0xbcd7f2, 0.35);
+  fillLight.position.set(-5, -1, -3);
+  scene.add(fillLight);
+  var accentLight = new THREE.PointLight(BLUE, 1.1, 12);
+  accentLight.position.set(0, 1.5, 4);
+  scene.add(accentLight);
+
+  function roundedRectShape(w, h, r) {
+    var shape = new THREE.Shape();
+    var x = -w / 2, y = -h / 2;
+    shape.moveTo(x, y + r);
+    shape.lineTo(x, y + h - r);
+    shape.quadraticCurveTo(x, y + h, x + r, y + h);
+    shape.lineTo(x + w - r, y + h);
+    shape.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
+    shape.lineTo(x + w, y + r);
+    shape.quadraticCurveTo(x + w, y, x + w - r, y);
+    shape.lineTo(x + r, y);
+    shape.quadraticCurveTo(x, y, x, y + r);
+    return shape;
+  }
+
+  var BLADE_LEN = 1.7, BLADE_H = 1.7, BLADE_R = 0.08;
+  var CENTER_GAP = 0.24;
+  var RISE_HEIGHT = 0.42;
+  var cardShape = roundedRectShape(BLADE_LEN, BLADE_H, BLADE_R);
+  var cardGeo = new THREE.ExtrudeGeometry(cardShape, {
+    depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3
+  });
+  cardGeo.center();
+
+  var chipGeo = new THREE.BoxGeometry(0.22, 0.16, 0.018);
+  var stripeGeo = new THREE.BoxGeometry(BLADE_LEN - 0.5, 0.12, 0.014);
+
+  function makeLabelTexture(text, color, fontSize) {
+    var c = document.createElement('canvas');
+    c.width = 512; c.height = 160;
+    var ctx = c.getContext('2d');
+    ctx.font = (fontSize || 38) + 'px "DM Sans", sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    var words = text.split(' ');
+    if (text.length > 14 && words.length > 1) {
+      var mid = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, mid).join(' '), 256, 58);
+      ctx.fillText(words.slice(mid).join(' '), 256, 108);
+    } else {
+      ctx.fillText(text, 256, 80);
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  var n = PRODUCTS.length;
+  var TWO_PI = Math.PI * 2;
+  var HALF_LEN = BLADE_LEN / 2;
+  var RADIUS = HALF_LEN + CENTER_GAP;
+  var CAM_ALIGN = -Math.PI / 2;
+  var SHOWCASE_ANGLE = Math.PI / 2;
+
+  var wheel = new THREE.Group();
+  scene.add(wheel);
+
+  var cards = PRODUCTS.map(function (product, i) {
+    var body = new THREE.Group();
+
+    var mat = new THREE.MeshPhysicalMaterial({
+      color: NAVY, metalness: 0.7, roughness: 0.28,
+      clearcoat: 0.55, clearcoatRoughness: 0.2
+    });
+    var cardMesh = new THREE.Mesh(cardGeo, mat);
+    body.add(cardMesh);
+
+    var chipMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    var chip = new THREE.Mesh(chipGeo, chipMat);
+    chip.position.set(-BLADE_LEN / 2 + 0.26, BLADE_H / 2 - 0.26, 0.038);
+    body.add(chip);
+
+    var stripeMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff, metalness: 0.1, roughness: 0.6, transparent: true, opacity: 0.32
+    });
+    var stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.set(0.2, -BLADE_H / 2 + 0.26, 0.034);
+    body.add(stripe);
+
+    var labelTex = makeLabelTexture(product.label, '#ffffff', 34);
+    var labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true });
+    var labelPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.4), labelMat);
+    labelPlane.position.set(0.05, -0.05, 0.038);
+    body.add(labelPlane);
+
+    body.userData = {
+      material: mat, chipMat: chipMat, stripeMat: stripeMat, labelMat: labelMat,
+      product: product, cardMesh: cardMesh, baseAngle: i * (TWO_PI / n), liftY: 0
+    };
+    cardMesh.userData.body = body;
+    wheel.add(body);
+    return body;
+  });
+
+  function setCardStyle(body, isFront) {
+    var d = body.userData;
+    d.material.color.set(isFront ? BLUE : NAVY);
+    d.material.metalness = isFront ? 0.25 : 0.7;
+    d.material.emissive.set(isFront ? 0x1c4a72 : 0x000000);
+    d.material.emissiveIntensity = isFront ? 0.25 : 0;
+    d.chipMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.opacity = isFront ? 0.9 : 0.32;
+    var oldTex = d.labelMat.map;
+    d.labelMat.map = makeLabelTexture(d.product.label, isFront ? '#001C44' : '#ffffff', isFront ? 40 : 32);
+    d.labelMat.needsUpdate = true;
+    if (oldTex) oldTex.dispose();
+  }
+
+  function normalizeAngle(a) {
+    a = a % TWO_PI;
+    if (a < 0) a += TWO_PI;
+    return a;
+  }
+  function shortestDelta(from, to) {
+    var diff = normalizeAngle(to) - normalizeAngle(from);
+    if (diff > Math.PI) diff -= TWO_PI;
+    if (diff < -Math.PI) diff += TWO_PI;
+    return diff;
+  }
+  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
+
+  var spinOffset = 0;
+  var SPIN_SPEED = reduceMotion ? 0 : 0.16;
+  var snap = null;
+  var lastFrontIndex = -1;
+
+  function frontIndexFor(offset) {
+    var best = 0, bestDist = Infinity;
+    cards.forEach(function (body, i) {
+      var theta = body.userData.baseAngle + offset;
+      var dist = Math.abs(shortestDelta(theta, SHOWCASE_ANGLE));
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
+
+  function selectCard(i) {
+    var currentAngle = cards[i].userData.baseAngle + spinOffset;
+    var delta = shortestDelta(currentAngle, SHOWCASE_ANGLE);
+    if (reduceMotion) {
+      spinOffset += delta;
+      return;
+    }
+    snap = { startOffset: spinOffset, deltaTotal: delta, startTime: performance.now(), duration: 700 };
+  }
+
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  var cardMeshes = cards.map(function (b) { return b.userData.cardMesh; });
+
+  function setMouseFromEvent(e) {
+    var rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+  function pickCardAt(e) {
+    setMouseFromEvent(e);
+    raycaster.setFromCamera(mouse, camera);
+    var hits = raycaster.intersectObjects(cardMeshes, false);
+    if (!hits.length) return null;
+    return hits[0].object.userData.body;
+  }
+
+  var DRAG_SENSITIVITY = 0.008; /* radians per pixel of horizontal drag */
+  var downPos = null;
+  var isDragging = false;
+  var dragStartX = 0;
+  var dragStartOffset = 0;
+
+  renderer.domElement.addEventListener('pointerdown', function (e) {
+    downPos = { x: e.clientX, y: e.clientY };
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartOffset = spinOffset;
+    snap = null;
+    if (renderer.domElement.setPointerCapture) {
+      try { renderer.domElement.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  });
+  renderer.domElement.addEventListener('pointermove', function (e) {
+    if (!isDragging) return;
+    spinOffset = dragStartOffset + (e.clientX - dragStartX) * DRAG_SENSITIVITY;
+  });
+  function endDrag(e) {
+    if (!downPos) return;
+    var wasDragging = isDragging;
+    isDragging = false;
+    var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
+    downPos = null;
+    if (Math.sqrt(dx * dx + dy * dy) > 6) {
+      if (wasDragging) selectCard(frontIndexFor(spinOffset));
+      return;
+    }
+    var body = pickCardAt(e);
+    if (!body) return;
+    var idx = cards.indexOf(body);
+    if (idx < 0) return;
+    if (idx === lastFrontIndex) {
+      window.location.href = body.userData.product.href;
+    } else {
+      selectCard(idx);
+    }
+  }
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointercancel', function () {
+    isDragging = false;
+    downPos = null;
+  });
+  if (!isTouch) {
+    renderer.domElement.addEventListener('mousemove', function (e) {
+      if (isDragging) return;
+      var body = pickCardAt(e);
+      renderer.domElement.style.cursor = body ? 'pointer' : 'grab';
+    });
+  }
+
+  function onResize() {
+    width = stage.clientWidth;
+    height = stage.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+  window.addEventListener('resize', onResize);
+
+  var lastTs = null;
+
+  function animate(ts) {
+    requestAnimationFrame(animate);
+    if (lastTs === null) lastTs = ts;
+    var dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+
+    if (isDragging) {
+      /* spinOffset already driven directly by the pointermove handler */
+    } else if (snap) {
+      var p = Math.min(Math.max((ts - snap.startTime) / snap.duration, 0), 1);
+      var ep = easeOutCubic(p);
+      spinOffset = snap.startOffset + snap.deltaTotal * ep;
+      if (p >= 1) snap = null;
+    } else {
+      spinOffset += SPIN_SPEED * dt;
+    }
+
+    cards.forEach(function (body) {
+      var theta = body.userData.baseAngle + spinOffset;
+      var rotY = theta + CAM_ALIGN;
+      var radialX = Math.cos(rotY);
+      var radialZ = -Math.sin(rotY);
+      body.rotation.y = rotY;
+      body.position.x = radialX * RADIUS;
+      body.position.z = radialZ * RADIUS;
+    });
+
+    var frontIndex = frontIndexFor(spinOffset);
+    if (frontIndex !== lastFrontIndex) {
+      if (lastFrontIndex >= 0) setCardStyle(cards[lastFrontIndex], false);
+      setCardStyle(cards[frontIndex], true);
+      lastFrontIndex = frontIndex;
+    }
+    cards.forEach(function (body, i) {
+      var targetScale = i === frontIndex ? 1.08 : 1;
+      body.scale.x += (targetScale - body.scale.x) * 0.15;
+      body.scale.y += (targetScale - body.scale.y) * 0.15;
+      body.scale.z += (targetScale - body.scale.z) * 0.15;
+
+      var liftTarget = i === frontIndex ? RISE_HEIGHT : 0;
+      var liftSpeed = liftTarget > body.userData.liftY ? 0.22 : 0.07;
+      body.userData.liftY += (liftTarget - body.userData.liftY) * liftSpeed;
+      body.position.y = body.userData.liftY;
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  requestAnimationFrame(animate);
+})();
+</script>
+<script>
+(function () {
+  var NAVY = 0x001C44;
+  var BLUE = 0x54B4F6;
+
+  var PRODUCTS = [
+    { label: "Business Term Loans", channel: "A lump sum with fixed repayments for growth or working capital." },
+    { label: "Business Line of Credit", channel: "Draw funds as you need them, pay interest only on what you use." },
+    { label: "Chattel Mortgage", channel: "Own equipment from day one while spreading out the cost." },
+    { label: "Vendor Finance", channel: "Connect" },
+    { label: "Point-of-Sale Finance", channel: "Connect" },
+    { label: "Self-Employed Home Loan", channel: "A home loan built around self-employed income." },
+    { label: "Second Mortgage", channel: "Access equity in property without refinancing." }
+  ];
+
+  var stage = document.getElementById('hero-scene-stage');
+  var loadingEl = document.getElementById('hero-scene-loading');
+  if (!stage) return;
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isTouch = 'ontouchstart' in window;
+
+  if (!window.THREE) {
+    loadingEl.textContent = 'Could not load 3D library.';
+    return;
+  }
+  loadingEl.style.display = 'none';
+
+  var width = stage.clientWidth;
+  var height = stage.clientHeight;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
+  /* Near eye-level, front-on view — the wheel reads as cards revolving
+     directly in front of the viewer, like a carousel, rather than a disc
+     seen from above. */
+  camera.position.set(0, 0.35, 6.3);
+  camera.lookAt(0, 0.15, 0);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  stage.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xdbe7f5, 0.95));
+  var keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  keyLight.position.set(4, 6, 5);
+  scene.add(keyLight);
+  var fillLight = new THREE.DirectionalLight(0xbcd7f2, 0.35);
+  fillLight.position.set(-5, -1, -3);
+  scene.add(fillLight);
+  var accentLight = new THREE.PointLight(BLUE, 1.1, 12);
+  accentLight.position.set(0, 1.5, 4);
+  scene.add(accentLight);
+
+  function roundedRectShape(w, h, r) {
+    var shape = new THREE.Shape();
+    var x = -w / 2, y = -h / 2;
+    shape.moveTo(x, y + r);
+    shape.lineTo(x, y + h - r);
+    shape.quadraticCurveTo(x, y + h, x + r, y + h);
+    shape.lineTo(x + w - r, y + h);
+    shape.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
+    shape.lineTo(x + w, y + r);
+    shape.quadraticCurveTo(x + w, y, x + w - r, y);
+    shape.lineTo(x + r, y);
+    shape.quadraticCurveTo(x, y, x, y + r);
+    return shape;
+  }
+
+  /* Local X = radial length (blade reaches from center out to this length),
+     local Y = height (the card stands upright, vertical),
+     local Z = thickness (the thin dimension — this is what makes the
+     top-down view read as a thin asterisk ray). */
+  var BLADE_LEN = 1.7, BLADE_H = 1.7, BLADE_R = 0.08;
+  var CENTER_GAP = 0.24; /* clearance between inner blade edges at the hub */
+  var RISE_HEIGHT = 0.65; /* how far the front/selected card lifts */
+  var cardShape = roundedRectShape(BLADE_LEN, BLADE_H, BLADE_R);
+  var cardGeo = new THREE.ExtrudeGeometry(cardShape, {
+    depth: 0.05, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 3
+  });
+  cardGeo.center();
+
+  var chipGeo = new THREE.BoxGeometry(0.22, 0.16, 0.018);
+  var stripeGeo = new THREE.BoxGeometry(BLADE_LEN - 0.5, 0.12, 0.014);
+
+  function makeLabelTexture(text, color, fontSize) {
+    var c = document.createElement('canvas');
+    c.width = 512; c.height = 160;
+    var ctx = c.getContext('2d');
+    ctx.font = (fontSize || 38) + 'px "DM Sans", sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    var words = text.split(' ');
+    if (text.length > 14 && words.length > 1) {
+      var mid = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, mid).join(' '), 256, 58);
+      ctx.fillText(words.slice(mid).join(' '), 256, 108);
+    } else {
+      ctx.fillText(text, 256, 80);
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  var n = PRODUCTS.length;
+  var TWO_PI = Math.PI * 2;
+  var HALF_LEN = BLADE_LEN / 2;
+  var RADIUS = HALF_LEN + CENTER_GAP;
+  /* Rotates the whole arrangement so theta = SHOWCASE_ANGLE is the position
+     where a blade's face (not its edge) points toward the camera. */
+  var CAM_ALIGN = -Math.PI / 2;
+  var SHOWCASE_ANGLE = Math.PI / 2;
+
+  var wheel = new THREE.Group();
+  scene.add(wheel);
+
+  var cards = PRODUCTS.map(function (product, i) {
+    var body = new THREE.Group();
+
+    var mat = new THREE.MeshPhysicalMaterial({
+      color: NAVY, metalness: 0.7, roughness: 0.28,
+      clearcoat: 0.55, clearcoatRoughness: 0.2
+    });
+    var cardMesh = new THREE.Mesh(cardGeo, mat);
+    body.add(cardMesh);
+
+    var chipMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
+    var chip = new THREE.Mesh(chipGeo, chipMat);
+    chip.position.set(-BLADE_LEN / 2 + 0.26, BLADE_H / 2 - 0.26, 0.038);
+    body.add(chip);
+
+    var stripeMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff, metalness: 0.1, roughness: 0.6, transparent: true, opacity: 0.32
+    });
+    var stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.set(0.2, -BLADE_H / 2 + 0.26, 0.034);
+    body.add(stripe);
+
+    var nameTex = makeLabelTexture(product.label, '#ffffff', 34);
+    var nameMat = new THREE.MeshBasicMaterial({ map: nameTex, transparent: true });
+    var namePlane = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.4), nameMat);
+    namePlane.position.set(0, BLADE_H / 2 - 0.42, 0.038);
+    body.add(namePlane);
+
+    var descTex = makeLabelTexture(product.channel, 'rgba(255,255,255,0.75)', 26);
+    var descMat = new THREE.MeshBasicMaterial({ map: descTex, transparent: true });
+    var descPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.34), descMat);
+    descPlane.position.set(0, -0.04, 0.038);
+    body.add(descPlane);
+
+    body.userData = {
+      material: mat, chipMat: chipMat, stripeMat: stripeMat, nameMat: nameMat, descMat: descMat,
+      product: product, cardMesh: cardMesh, baseAngle: i * (TWO_PI / n), liftY: 0
+    };
+    cardMesh.userData.body = body;
+    wheel.add(body);
+    return body;
+  });
+
+  function setCardStyle(body, isFront) {
+    var d = body.userData;
+    d.material.color.set(isFront ? BLUE : NAVY);
+    d.material.metalness = isFront ? 0.25 : 0.7;
+    d.material.emissive.set(isFront ? 0x1c4a72 : 0x000000);
+    d.material.emissiveIntensity = isFront ? 0.25 : 0;
+    d.chipMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.color.set(isFront ? NAVY : 0xffffff);
+    d.stripeMat.opacity = isFront ? 0.9 : 0.32;
+
+    var oldNameTex = d.nameMat.map;
+    d.nameMat.map = makeLabelTexture(d.product.label, isFront ? '#001C44' : '#ffffff', isFront ? 40 : 32);
+    d.nameMat.needsUpdate = true;
+    if (oldNameTex) oldNameTex.dispose();
+
+    var oldDescTex = d.descMat.map;
+    d.descMat.map = makeLabelTexture(
+      d.product.channel,
+      isFront ? 'rgba(0,28,68,0.7)' : 'rgba(255,255,255,0.65)',
+      isFront ? 30 : 24
+    );
+    d.descMat.needsUpdate = true;
+    if (oldDescTex) oldDescTex.dispose();
+  }
+
+  function normalizeAngle(a) {
+    a = a % TWO_PI;
+    if (a < 0) a += TWO_PI;
+    return a;
+  }
+  function shortestDelta(from, to) {
+    var diff = normalizeAngle(to) - normalizeAngle(from);
+    if (diff > Math.PI) diff -= TWO_PI;
+    if (diff < -Math.PI) diff += TWO_PI;
+    return diff;
+  }
+  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
+
+  var spinOffset = 0;
+  var SPIN_SPEED = reduceMotion ? 0 : 0.16;
+  var snap = null;
+  var lastFrontIndex = -1;
+
+  function frontIndexFor(offset) {
+    var best = 0, bestDist = Infinity;
+    cards.forEach(function (body, i) {
+      var theta = body.userData.baseAngle + offset;
+      var dist = Math.abs(shortestDelta(theta, SHOWCASE_ANGLE));
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
+
+  function selectCard(i) {
+    var currentAngle = cards[i].userData.baseAngle + spinOffset;
+    var delta = shortestDelta(currentAngle, SHOWCASE_ANGLE);
+    if (reduceMotion) {
+      spinOffset += delta;
+      return;
+    }
+    snap = { startOffset: spinOffset, deltaTotal: delta, startTime: performance.now(), duration: 700 };
+  }
+
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  var cardMeshes = cards.map(function (b) { return b.userData.cardMesh; });
+
+  function setMouseFromEvent(e) {
+    var rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+  function pickCardAt(e) {
+    setMouseFromEvent(e);
+    raycaster.setFromCamera(mouse, camera);
+    var hits = raycaster.intersectObjects(cardMeshes, false);
+    if (!hits.length) return null;
+    return hits[0].object.userData.body;
+  }
+
+  var DRAG_SENSITIVITY = 0.008; /* radians per pixel of horizontal drag */
+  var downPos = null;
+  var isDragging = false;
+  var dragStartX = 0;
+  var dragStartOffset = 0;
+
+  renderer.domElement.addEventListener('pointerdown', function (e) {
+    downPos = { x: e.clientX, y: e.clientY };
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartOffset = spinOffset;
+    snap = null;
+    if (renderer.domElement.setPointerCapture) {
+      try { renderer.domElement.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  });
+  renderer.domElement.addEventListener('pointermove', function (e) {
+    if (!isDragging) return;
+    spinOffset = dragStartOffset + (e.clientX - dragStartX) * DRAG_SENSITIVITY;
+  });
+  function endDrag(e) {
+    if (!downPos) return;
+    var wasDragging = isDragging;
+    isDragging = false;
+    var dx = e.clientX - downPos.x, dy = e.clientY - downPos.y;
+    downPos = null;
+    if (Math.sqrt(dx * dx + dy * dy) > 6) {
+      if (wasDragging) selectCard(frontIndexFor(spinOffset));
+      return;
+    }
+    var body = pickCardAt(e);
+    if (body) {
+      var idx = cards.indexOf(body);
+      if (idx >= 0) selectCard(idx);
+    }
+  }
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointercancel', function () {
+    isDragging = false;
+    downPos = null;
+  });
+  if (!isTouch) {
+    renderer.domElement.addEventListener('mousemove', function (e) {
+      if (isDragging) return;
+      var body = pickCardAt(e);
+      renderer.domElement.style.cursor = body ? 'pointer' : 'grab';
+    });
+  }
+
+  function onResize() {
+    width = stage.clientWidth;
+    height = stage.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+  window.addEventListener('resize', onResize);
+
+  var lastTs = null;
+
+  function animate(ts) {
+    requestAnimationFrame(animate);
+    if (lastTs === null) lastTs = ts;
+    var dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+
+    if (isDragging) {
+      /* spinOffset already driven directly by the pointermove handler */
+    } else if (snap) {
+      var p = Math.min(Math.max((ts - snap.startTime) / snap.duration, 0), 1);
+      var ep = easeOutCubic(p);
+      spinOffset = snap.startOffset + snap.deltaTotal * ep;
+      if (p >= 1) snap = null;
+    } else {
+      spinOffset += SPIN_SPEED * dt;
+    }
+
+    cards.forEach(function (body) {
+      var theta = body.userData.baseAngle + spinOffset;
+      var rotY = theta + CAM_ALIGN;
+      var radialX = Math.cos(rotY);
+      var radialZ = -Math.sin(rotY);
+      body.rotation.y = rotY;
+      body.position.x = radialX * RADIUS;
+      body.position.z = radialZ * RADIUS;
+    });
+
+    var frontIndex = frontIndexFor(spinOffset);
+    if (frontIndex !== lastFrontIndex) {
+      if (lastFrontIndex >= 0) setCardStyle(cards[lastFrontIndex], false);
+      setCardStyle(cards[frontIndex], true);
+      lastFrontIndex = frontIndex;
+    }
+    cards.forEach(function (body, i) {
+      var targetScale = i === frontIndex ? 1.08 : 1;
+      body.scale.x += (targetScale - body.scale.x) * 0.15;
+      body.scale.y += (targetScale - body.scale.y) * 0.15;
+      body.scale.z += (targetScale - body.scale.z) * 0.15;
+
+      /* Rise up when a card becomes the selected/front card — quick pop
+         up, slower settle back down for the rest. */
+      var liftTarget = i === frontIndex ? RISE_HEIGHT : 0;
+      var liftSpeed = liftTarget > body.userData.liftY ? 0.22 : 0.07;
+      body.userData.liftY += (liftTarget - body.userData.liftY) * liftSpeed;
+      body.position.y = body.userData.liftY;
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>

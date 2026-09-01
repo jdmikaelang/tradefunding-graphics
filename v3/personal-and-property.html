@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Funding — Personal &amp; Property</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<style>
+.hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 540px;gap:32px;align-items:center;align-content:center}
+.hero-title{margin:22px 0 0;font-weight:600;font-size:clamp(2.1rem,3.6vw,3rem);line-height:1.08;letter-spacing:var(--ls-heading);color:var(--navy);max-width:560px}
+.hero-sub{margin:22px 0 0;font-size:1.05rem;color:var(--text-secondary);line-height:1.7;max-width:480px}
+.hero-anim{position:relative;width:100%;aspect-ratio:1/1;max-height:540px;margin-left:-24px}
+.hero-anim canvas{display:block;width:100%;height:100%}
+@media (max-width:900px){
+  .hero-anim{margin-left:0}
+}
+
+.service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap-card)}
+.service-card{display:block;background:#fff;border:1px solid var(--border);border-top:3px solid var(--peach);border-radius:var(--radius-lg);padding:26px;box-shadow:var(--shadow-soft);transition:transform 300ms var(--ease),box-shadow 300ms var(--ease)}
+.service-card:hover{transform:translateY(var(--lift-card));box-shadow:var(--shadow-lg-soft)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.stat-value{font-family:var(--font-heading);font-weight:700;font-size:clamp(2.1rem,3.4vw,2.7rem);letter-spacing:var(--ls-heading);color:var(--peach);margin-bottom:10px}
+
+.pill-group{display:flex;justify-content:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.pill-btn{padding:9px 18px;border-radius:var(--radius-pill);background:transparent;color:var(--text-secondary);border:1px solid var(--border-neutral);font-family:var(--font-heading);font-weight:600;font-size:0.8rem}
+.pill-btn:hover{background:var(--light-bg)}
+.pill-btn.is-active{background:#D63838;color:#fff;border-color:#D63838}
+
+.pathway-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;box-shadow:var(--shadow-soft)}
+.field{width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.85rem;color:var(--navy);background:#fff;font-family:var(--font-body);margin-bottom:12px}
+.field:focus{border-color:var(--peach);box-shadow:0 0 0 3px rgba(255,93,92,0.08)}
+
+.day-pill{flex:1;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid var(--border);color:var(--navy);font-family:var(--font-heading);font-weight:600;font-size:0.78rem}
+.day-pill.is-active{background:#D63838;color:#fff;border-color:#D63838}
+.time-slot{display:flex;align-items:center;justify-content:center;min-height:44px;text-align:center;padding:9px 0;border-radius:8px;background:#fff;border:1px solid var(--border);color:var(--navy);font-family:var(--font-heading);font-weight:500;font-size:0.76rem}
+
+.pp-sample-row{display:grid;grid-template-columns:1.4fr 1fr auto;gap:12px;padding:13px 0;border-bottom:1px solid #eef0f4;align-items:center}
+.pp-sample-lender{font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)}
+.pp-sample-product{font-size:0.74rem;color:var(--text-secondary)}
+.pp-sample-rate{font-family:var(--font-heading);font-weight:700;font-size:0.85rem;color:var(--navy);text-align:right}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .service-grid,.stats-grid{grid-template-columns:1fr 1fr}
+  .stats-grid > *:first-child{border-right:none !important}
+}
+@media (max-width:400px){
+  .pathway-card{padding:24px}
+  .day-pill{padding:9px 4px}
+}
+@media (max-width:520px){
+  .container[style*="justify-content:space-between"]{justify-content:center}
+  .container[style*="justify-content:space-between"] input[style*="width:220px"]{width:100%;flex:1}
+  .container[style*="justify-content:space-between"] > div[style*="display:flex"]{width:100%}
+}
+</style>
+</head>
+<body class="channel-personalproperty">
+
+<!-- NAV -->
+<nav class="tf-nav" aria-label="Primary">
+<div class="tf-nav-inner">
+<a href="index.html" class="tf-nav-logo"><img src="assets/img/logo-navy.png" alt="Trade Funding"></a>
+<div class="tf-nav-links">
+<div class="tf-nav-item">
+<span class="tf-nav-link">Products<span class="tf-caret" aria-hidden="true"></span></span>
+<div class="tf-mega-panel tf-mega-panel-wide">
+<div class="tf-mega-wide-inner">
+<a href="personal-and-property.html" class="tf-mega-wide-lead">All Personal &amp; Property options<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<div class="tf-mega-wide-grid tf-mega-wide-grid-3">
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Home Loans</span>
+<div class="tf-mega-wide-links">
+<a href="personal-and-property/home-loans/index.html" class="tf-mega-wide-link">Home Loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/refinancing/index.html" class="tf-mega-wide-link">Refinancing<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/self-employed-home-loans/index.html" class="tf-mega-wide-link">Self-Employed Home Loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Property Investment</span>
+<div class="tf-mega-wide-links">
+<a href="personal-and-property/investment-property/index.html" class="tf-mega-wide-link">Investment Property<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/commercial-property/index.html" class="tf-mega-wide-link">Commercial Property<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/construction/index.html" class="tf-mega-wide-link">Construction<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/smsf-property/index.html" class="tf-mega-wide-link">SMSF Property<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Personal Finance</span>
+<div class="tf-mega-wide-links">
+<a href="personal-and-property/personal-loans/index.html" class="tf-mega-wide-link">Personal Loans<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/debt-consolidation/index.html" class="tf-mega-wide-link">Debt Consolidation<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="personal-and-property/second-mortgage/index.html" class="tf-mega-wide-link">Second Mortgage<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="tf-nav-item">
+<span class="tf-nav-link">Compare<span class="tf-caret" aria-hidden="true"></span></span>
+<div class="tf-mega-panel tf-mega-panel-wide">
+<div class="tf-mega-wide-inner">
+<a href="commercial/compare-report/index.html" class="tf-mega-wide-lead">Compare your options<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<div class="tf-mega-wide-grid tf-mega-wide-grid-compact">
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Compare</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/compare-report/index.html" class="tf-mega-wide-link">Compare Report<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/meet-cashper/index.html" class="tf-mega-wide-link">Meet Cashper<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+<div class="tf-mega-wide-col">
+<span class="tf-mega-wide-group-label">Calculators</span>
+<div class="tf-mega-wide-links">
+<a href="commercial/repayment-calculator/index.html" class="tf-mega-wide-link">Repayment Calculator<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+<a href="commercial/equipment-calculator/index.html" class="tf-mega-wide-link">Equipment Finance Calculator<span class="tf-mega-arrow" aria-hidden="true">&rarr;</span></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<a href="home-shared/about/index.html" class="tf-nav-link">About</a>
+</div>
+<nav class="tf-toggle" aria-label="Switch Trade Funding channel">
+<a href="index.html" class="tf-toggle-home" aria-label="Home">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"></path></svg>
+</a>
+<a href="commercial.html" class="tf-toggle-tab">Commercial</a>
+<a href="connect.html" class="tf-toggle-tab">Connect</a>
+<a href="personal-and-property.html" class="tf-toggle-tab is-active">Personal &amp; Property</a>
+</nav>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-grid" style="min-height:var(--hero-min-h);box-sizing:border-box;padding:var(--section-y) 0">
+<div>
+<span style="display:inline-flex;align-items:center;gap:10px" class="eyebrow"><span style="width:7px;height:7px;border-radius:50%;background:var(--peach)"></span>Personal &amp; Property Finance</span>
+<h1 class="hero-title">Personal and property funding, for the business owner behind the business.</h1>
+<p class="hero-sub">We compare a specialist panel of 70+ lenders so you see your real options first — before you commit to one.</p>
+<div style="display:flex;align-items:center;gap:16px;margin-top:34px;flex-wrap:wrap">
+<a href="#pathways" class="btn btn-primary">Get your options <span aria-hidden="true">&rarr;</span></a>
+<a href="#pathways" class="btn btn-outline">Book a 15-min chat</a>
+</div>
+</div>
+<div class="hero-anim"><canvas id="pp-hero-scene" aria-hidden="true"></canvas></div>
+</section>
+
+<!-- SERVICE GRID -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container-wide">
+<div style="text-align:center;margin:0 auto 44px;max-width:640px">
+<p class="eyebrow" style="text-align:center">Funding Solutions</p>
+<h2 class="section-title" style="margin-bottom:16px">Ten ways we fund the person behind the business.</h2>
+<div class="rule"></div>
+</div>
+<div class="service-grid">
+<a href="personal-and-property/home-loans/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Home Loans</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">First home, next home, or refinance.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/investment-property/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Investment Property</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">Buy, refinance, or restructure your portfolio.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/commercial-property/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Commercial Property</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">Fund the premises your business runs from.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/construction/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Construction</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">New builds, staged progress payments, handled.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/smsf-property/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">SMSF Property</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">Property finance inside your SMSF, done right.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/personal-loans/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Personal Loans</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">Secured or unsecured, bank or specialist.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/debt-consolidation/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Debt Consolidation</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">One clear structure, instead of several.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/refinancing/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Refinancing</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">See what a better deal actually looks like.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/self-employed-home-loans/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Self-Employed Home Loans</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">A home loan built around self-employed income, without the paperwork a standard bank loan demands.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+<a href="personal-and-property/second-mortgage/index.html" class="service-card"><h3 style="font-weight:600;font-size:1.02rem;color:var(--navy);margin-bottom:8px">Second Mortgage</h3><p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:12px">Access equity in property you already own without refinancing or disturbing your first mortgage.</p><span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">Learn more &rarr;</span></a>
+</div>
+</div>
+</section>
+
+<!-- STATS -->
+<section style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:var(--section-y-sm) 0">
+<div class="container stats-grid">
+<div style="padding-right:32px;border-right:1px solid var(--border)"><div class="stat-value">70+</div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.92rem;color:var(--navy);margin-bottom:6px">lenders on panel</div><div style="font-size:0.82rem;color:var(--ink-600);line-height:1.5">Same lender relationships we use for business finance — now working for you personally.</div></div>
+<div style="padding-right:32px;border-right:1px solid var(--border)"><div class="stat-value">1</div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.92rem;color:var(--navy);margin-bottom:6px">clear comparison</div><div style="font-size:0.82rem;color:var(--ink-600);line-height:1.5">See side-by-side terms before you commit to a single product.</div></div>
+<div><div class="stat-value">0</div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.92rem;color:var(--navy);margin-bottom:6px">cost to compare</div><div style="font-size:0.82rem;color:var(--ink-600);line-height:1.5">No credit check, no obligation, free to explore your options.</div></div>
+</div>
+</section>
+
+<!-- PROOF MOMENT -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container-prose" style="text-align:center;margin-bottom:36px">
+<h2 class="section-title" style="font-weight:700;font-size:clamp(1.6rem,2.8vw,2.1rem)">See your options before you speak to anyone.</h2>
+</div>
+
+<div class="pill-group">
+<button class="pill-btn is-active" data-pill-group="loan-type" data-value="home">Home</button>
+<button class="pill-btn" data-pill-group="loan-type" data-value="investment">Investment</button>
+<button class="pill-btn" data-pill-group="loan-type" data-value="commercial">Commercial</button>
+<button class="pill-btn" data-pill-group="loan-type" data-value="construction">Construction</button>
+</div>
+
+<div style="max-width:520px;margin:0 auto;padding:0 32px">
+<div class="card" style="box-shadow:var(--shadow-float);overflow:hidden">
+<div style="padding:12px 22px;background:var(--bg-soft);border-bottom:1px solid #eaedf2;display:flex;align-items:center;gap:8px">
+<span style="width:7px;height:7px;border-radius:50%;background:var(--success)"></span>
+<span style="font-family:var(--font-heading);font-size:0.72rem;font-weight:600;color:var(--text-secondary)">Matching lenders for a <span id="pp-loan-type-label">home loan</span></span>
+</div>
+<div style="padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eaedf2">
+<div><div style="font-family:var(--font-heading);font-weight:700;font-size:0.85rem;color:var(--navy)">Owner-Occupied Home Loan &middot; $650,000</div><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:2px">Your options, side by side</div></div>
+<span style="display:inline-flex;align-items:center;padding:5px 12px;border-radius:var(--radius-pill);font-family:var(--font-heading);font-weight:600;font-size:0.66rem;letter-spacing:var(--ls-eyebrow-tight);text-transform:uppercase;background:var(--tint-peach-10);color:var(--peach)">Sample</span>
+</div>
+<div style="padding:4px 22px 12px">
+<div style="display:grid;grid-template-columns:1.4fr 1fr auto;gap:12px;font-family:var(--font-heading);font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);padding:10px 0;border-bottom:2px solid #e0e4ea">
+<span>Lender</span><span>Product</span><span style="text-align:right">Rate p.a.</span>
+</div>
+<div id="pp-sample-rows">
+<div class="pp-sample-row"><span class="pp-sample-lender">Lender A</span><span class="pp-sample-product">Full-doc • 80% LVR</span><span class="pp-sample-rate">6.49%</span></div>
+<div class="pp-sample-row"><span class="pp-sample-lender">Lender B</span><span class="pp-sample-product">Alt-doc • 75% LVR</span><span class="pp-sample-rate">6.79%</span></div>
+<div class="pp-sample-row"><span class="pp-sample-lender">Lender C</span><span class="pp-sample-product">Low-doc • 80% LVR</span><span class="pp-sample-rate">7.05%</span></div>
+</div>
+</div>
+<div style="padding:14px 22px;background:linear-gradient(180deg,#fff,var(--tint-peach-08));border-top:1px solid #eaedf2;display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-secondary)">
+<span style="font-style:italic">Sample data &bull; your report is personalised</span><span>Lender panel TBD</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TWO PATHWAYS -->
+<section id="pathways" style="background:var(--light-bg);padding:var(--section-y) 0">
+<div class="container tf-pathways-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:26px">
+
+<div class="pathway-card">
+<p style="font-family:var(--font-heading);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--peach);margin-bottom:12px">Enquire Online</p>
+<h3 style="font-family:var(--font-heading);font-weight:700;font-size:1.3rem;color:var(--navy);margin-bottom:10px">Tell us what you need. We'll come back with real options.</h3>
+<p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;margin-bottom:22px">A few details, sent straight to our Personal &amp; Property team.</p>
+
+<!--
+  Static markup only — no submission handler wired up yet.
+  Dev/integration note (per Matt's Website Brief): on submit, this form
+  should auto-create a referral/lead in Zoho CRM plus a follow-up task
+  assigned to James Lowe, so the enquiry enters the Personal & Property
+  pipeline immediately. Wire this endpoint before go-live.
+-->
+<form data-enquiry-form aria-label="Enquiry form (not yet connected to Zoho)">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<input class="field" placeholder="Name" name="name">
+<input class="field" placeholder="Mobile" name="mobile">
+</div>
+<input class="field" placeholder="Email" name="email" type="email">
+<select class="field" name="topic">
+<option value="">What can we help you with?</option>
+<option>Home Loans</option><option>Investment Property</option><option>Commercial Property</option><option>Construction</option><option>SMSF Property</option><option>Personal Loans</option><option>Debt Consolidation</option><option>Refinancing</option><option>Self-Employed Home Loans</option><option>Second Mortgage</option>
+</select>
+<textarea class="field" rows="3" placeholder="Details or comments (optional)" name="details"></textarea>
+<input class="field" placeholder="Preferred contact method / time" name="preferred_contact" style="margin-bottom:20px">
+<button type="submit" class="btn btn-primary" style="width:100%">Send enquiry <span aria-hidden="true">&rarr;</span></button>
+</form>
+</div>
+
+<div class="pathway-card" style="display:flex;flex-direction:column">
+<p style="font-family:var(--font-heading);font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:var(--ls-label);color:var(--peach);margin-bottom:12px">Book a 15-Minute Chat</p>
+<h3 style="font-family:var(--font-heading);font-weight:700;font-size:1.3rem;color:var(--navy);margin-bottom:10px">Not ready to commit to a form? Grab 15 minutes instead.</h3>
+<p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;margin-bottom:26px">A short call to confirm fit — then we'll arrange a fuller appointment if it makes sense.</p>
+
+<!-- Static booking preview — replace with live booking widget (e.g. Calendly) before go-live -->
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-md);padding:22px;margin-bottom:26px">
+<div style="font-family:var(--font-heading);font-weight:600;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">This week</div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<span class="day-pill" data-day-pill>Mon</span>
+<span class="day-pill is-active" data-day-pill>Tue</span>
+<span class="day-pill" data-day-pill>Wed</span>
+<span class="day-pill" data-day-pill>Thu</span>
+<span class="day-pill" data-day-pill>Fri</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<span class="time-slot">9:00am</span><span class="time-slot">11:30am</span><span class="time-slot">1:00pm</span>
+<span class="time-slot">2:30pm</span><span class="time-slot">4:00pm</span><span class="time-slot">4:30pm</span>
+</div>
+</div>
+
+<span class="btn btn-outline btn-disabled" aria-disabled="true" style="margin-top:auto">Book a time</span>
+</div>
+
+</div>
+</section>
+
+<!-- PROFILE -->
+<section style="background:#fff;padding:var(--section-y) 0">
+<div class="container">
+<div class="card" style="display:flex;align-items:center;gap:28px;padding:26px 30px">
+<div style="width:84px;height:84px;flex-shrink:0;border-radius:12px;background:var(--tint-peach-10);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:700;font-size:1.6rem;color:var(--peach)">JL</div>
+<div>
+<p style="font-family:var(--font-heading);font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:6px">James Lowe <span style="font-weight:500;color:var(--text-secondary)">— Head of Personal &amp; Property</span></p>
+<p style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;max-width:600px">Close to three decades across banking and lending. James's focus: understand what you're actually trying to achieve, then structure the right fit — especially when the situation isn't straightforward.</p>
+<span style="font-family:var(--font-heading);font-weight:600;font-size:0.82rem;color:var(--navy)">0480 855 739</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- NEWS & INSIGHTS -->
+<section style="background:var(--bg-soft);padding:var(--section-y-sm) 0;border-top:1px solid var(--border)">
+<div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+<p style="font-size:0.92rem;color:var(--text-secondary);font-family:var(--font-heading);font-weight:500">Insights on personal &amp; property finance — coming soon.</p>
+<div style="display:flex;gap:10px">
+<input class="field" placeholder="Email address" style="width:220px;margin-bottom:0">
+<span class="btn btn-outline btn-disabled" aria-disabled="true" style="padding:10px 18px;border-width:1px;border-color:var(--border)">Get notified</span>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="tf-footer">
+<div class="container-wide">
+<div class="tf-footer-top">
+<div>
+<img src="assets/img/logo-white.png" alt="Trade Funding" style="height:20px;width:auto;display:block;margin-bottom:16px;">
+<p class="tf-footer-blurb">Personal and property funding, for the business owner behind the business.</p>
+<div class="tf-footer-contact">
+<a href="tel:1300161641">1300 161 641</a>
+<a href="mailto:support@tradefunding.com.au">support@tradefunding.com.au</a>
+<span>Level 8, 387 George Street, Sydney, NSW, 2000</span>
+</div>
+<div class="tf-footer-badges">
+<span class="tf-footer-badge">ACL 387856</span>
+<span class="tf-footer-badge">AFCA Member</span>
+<span class="tf-footer-badge">CAFBA</span>
+<span class="tf-footer-badge">Fintech Australia</span>
+</div>
+</div>
+<div class="tf-footer-cols">
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Channels</div>
+<a href="commercial.html">Business Loans</a>
+<a href="connect.html">Connect</a>
+<a href="personal-and-property.html">Personal &amp; Property</a>
+<a href="commercial/guides/index.html">Guides &amp; Tools</a>
+</div>
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Company</div>
+<a href="home-shared/about/index.html">About Us</a>
+<a href="home-shared/broker-portal/index.html">Broker Portal</a>
+<a href="connect.html">Become a Partner</a>
+<a href="home-shared/contact/index.html">Contact</a>
+<a href="home-shared/apply/index.html">Get Started</a>
+</div>
+<div class="tf-footer-col">
+<div class="tf-footer-col-heading">Legal</div>
+<a href="home-shared/credit-guide/index.html">Credit Guide</a>
+<a href="home-shared/privacy/index.html">Privacy Policy</a>
+<a href="home-shared/terms/index.html">Terms &amp; Conditions</a>
+</div>
+</div>
+</div>
+<div class="tf-footer-legal">
+<p>Credit products are provided by third-party lenders and credit offers are subject to a full credit review. Read our <a href="home-shared/credit-guide/index.html" style="color:rgba(255,255,255,0.85)">Credit Guide</a> | <a href="home-shared/terms/index.html" style="color:rgba(255,255,255,0.85)">Terms &amp; Conditions</a> | ACL 387856</p>
+</div>
+<div class="tf-footer-bottom">
+<span>&copy; 2026 Trade Funding Pty Ltd. All rights reserved.</span>
+</div>
+</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+
+  const CONFIG = {
+    COLORS: {
+      navy:     0x001C44,
+      skyblue:  0x54B4F6,
+      peach:    0xFF5D5C,
+      yellow:   0xFBB766,
+      walls:    0xF7F9FC,
+      trunk:    0x0a2c5c,
+      cabinGlass: 0x00142e
+    },
+    CAMERA: {
+      fov: 32,
+      position: { x: 4.4, y: 3.4, z: 5.6 },
+      lookAt:   { x: 0, y: 0.35, z: 0 }
+    },
+    HOUSE: {
+      width: 1.7,
+      depth: 1.5,
+      wallHeight: 1.05,
+      roofHeight: 0.75,
+      roofOverhang: 0.16,
+      roofThickness: 0.07,
+      doorWidth: 0.32,
+      doorHeight: 0.62,
+      windowSize: 0.26,
+      chimney: { width: 0.16, height: 0.42 }
+    },
+    TILE: {
+      size: 3.2,
+      thickness: 0.22,
+      cornerBevel: 0.06
+    },
+    TREES: {
+      count: 2,
+      trunkRadius: 0.045,
+      trunkHeight: 0.22,
+      coneRadius: 0.24,
+      coneHeight: 0.5,
+      positions: [
+        { x: -1.05, z: 0.55 },
+        { x: -0.75, z: -0.65 }
+      ]
+    },
+    CAR: {
+      bodyLength: 0.62,
+      bodyWidth: 0.34,
+      bodyHeight: 0.2,
+      cabinLength: 0.32,
+      cabinWidth: 0.27,
+      cabinHeight: 0.16,
+      cabinOffsetX: -0.03,
+      wheelRadius: 0.09,
+      wheelWidth: 0.07,
+      axleInsetX: 0.19,
+      trackHalfWidth: 0.15,
+      lightStripWidth: 0.05,
+      start: { x: 2.2, z: 1.15 },
+      park:  { x: 1.05, z: 0.97 },
+      facingAngle: Math.PI,
+      driveDelay: 0.4,
+      driveDuration: 2.2
+    },
+    MOTION: {
+      rotationSpeed: 0.07,
+      bobAmount: 0.04,
+      bobSpeed: 0.4,
+      staticRestAngle: 0.55,
+      parallaxStrength: 0.10,
+      parallaxEase: 0.06
+    },
+    BUILD: {
+      buildDuration: 5.0,
+      holdDuration: 3.2,
+      teardownDuration: 3.0,
+      restDuration: 1.0,
+      partSpan: 0.34,
+      drawFraction: 0.55
+    },
+    LINE: {
+      color: 0x54B4F6,
+      opacity: 0.85
+    },
+    LIGHTS: {
+      hemi:  { sky: 0xffffff, ground: 0xbfe0ff, intensity: 1.0 },
+      key:   { color: 0xffffff, intensity: 1.0, position: { x: 3.5, y: 5, z: 4 } },
+      accent:{ color: 0x54B4F6, intensity: 0.55, position: { x: -3, y: 1.5, z: -2 }, distance: 12 }
+    },
+    RENDER: {
+      pixelRatioCap: 2
+    }
+  };
+
+  const canvas = document.getElementById('pp-hero-scene');
+  if (!canvas) return;
+  const container = canvas.parentElement;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = matchMedia('(pointer: coarse)').matches;
+
+  const scene = new THREE.Scene();
+
+  function containerSize(){
+    return { w: container.clientWidth || 1, h: container.clientHeight || 1 };
+  }
+
+  const camera = new THREE.PerspectiveCamera(CONFIG.CAMERA.fov, containerSize().w / containerSize().h, 0.1, 100);
+  camera.position.set(CONFIG.CAMERA.position.x, CONFIG.CAMERA.position.y, CONFIG.CAMERA.position.z);
+  camera.lookAt(CONFIG.CAMERA.lookAt.x, CONFIG.CAMERA.lookAt.y, CONFIG.CAMERA.lookAt.z);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.RENDER.pixelRatioCap));
+  renderer.setSize(containerSize().w, containerSize().h);
+
+  const hemi = new THREE.HemisphereLight(CONFIG.LIGHTS.hemi.sky, CONFIG.LIGHTS.hemi.ground, CONFIG.LIGHTS.hemi.intensity);
+  scene.add(hemi);
+
+  const key = new THREE.DirectionalLight(CONFIG.LIGHTS.key.color, CONFIG.LIGHTS.key.intensity);
+  key.position.set(CONFIG.LIGHTS.key.position.x, CONFIG.LIGHTS.key.position.y, CONFIG.LIGHTS.key.position.z);
+  scene.add(key);
+
+  const accent = new THREE.PointLight(CONFIG.LIGHTS.accent.color, CONFIG.LIGHTS.accent.intensity, CONFIG.LIGHTS.accent.distance);
+  accent.position.set(CONFIG.LIGHTS.accent.position.x, CONFIG.LIGHTS.accent.position.y, CONFIG.LIGHTS.accent.position.z);
+  scene.add(accent);
+
+  const world = new THREE.Group();
+  scene.add(world);
+
+  const groundY = CONFIG.TILE.thickness * 0.4;
+
+  /* Liquid-glass finish: glossy clearcoat over a smooth, fully opaque
+     fill — glassy sheen without going see-through once drawn. */
+  function glassMat(hex, roughness, metalness){
+    return new THREE.MeshPhysicalMaterial({
+      color: hex,
+      transparent: true,
+      opacity: 0,
+      roughness: roughness !== undefined ? roughness : 0.18,
+      metalness: metalness !== undefined ? metalness : 0.05,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.15,
+      ior: 1.4
+    });
+  }
+
+  const parts = [];
+
+  /* Each part is first traced as a glowing outline (like a pen sketching
+     its edges), then solidifies into the glass fill once fully traced. */
+  function registerPart(mesh){
+    const edges = new THREE.EdgesGeometry(mesh.geometry);
+    edges.setDrawRange(0, 0);
+    const lineMat = new THREE.LineBasicMaterial({
+      color: CONFIG.LINE.color, transparent: true, opacity: 0
+    });
+    const line = new THREE.LineSegments(edges, lineMat);
+    mesh.add(line);
+
+    const total = edges.index ? edges.index.count : edges.attributes.position.count;
+    mesh.scale.setScalar(0.9);
+    parts.push({ mesh, line, geometry: edges, total, appearAt: 0, duration: 0 });
+    return mesh;
+  }
+
+  function buildTile(){
+    const group = new THREE.Group();
+    const t = CONFIG.TILE;
+
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(t.size, t.thickness, t.size),
+      glassMat(CONFIG.COLORS.navy, 0.5, 0.1)
+    );
+    base.position.y = -t.thickness / 2;
+    group.add(base);
+    registerPart(base);
+
+    const topSize = t.size - t.cornerBevel * 2;
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(topSize, t.thickness * 0.4, topSize),
+      glassMat(CONFIG.COLORS.skyblue, 0.35, 0.05)
+    );
+    top.position.y = t.thickness * 0.2;
+    group.add(top);
+    registerPart(top);
+
+    return group;
+  }
+
+  function buildHouse(){
+    const group = new THREE.Group();
+    const h = CONFIG.HOUSE;
+
+    const walls = new THREE.Mesh(
+      new THREE.BoxGeometry(h.width, h.wallHeight, h.depth),
+      glassMat(CONFIG.COLORS.walls, 0.6, 0)
+    );
+    walls.position.y = h.wallHeight / 2;
+    group.add(walls);
+    registerPart(walls);
+
+    const roofRun = h.width / 2 + h.roofOverhang;
+    const roofLen = Math.sqrt(roofRun * roofRun + h.roofHeight * h.roofHeight);
+    const roofAngle = Math.atan2(h.roofHeight, roofRun);
+    const roofDepth = h.depth + h.roofOverhang * 2;
+
+    const roofA = new THREE.Mesh(
+      new THREE.BoxGeometry(roofLen, h.roofThickness, roofDepth),
+      glassMat(CONFIG.COLORS.navy, 0.4, 0.08)
+    );
+    roofA.position.set(-roofRun / 2, h.wallHeight + h.roofHeight / 2, 0);
+    roofA.rotation.z = roofAngle;
+    group.add(roofA);
+    registerPart(roofA);
+
+    const roofB = new THREE.Mesh(
+      new THREE.BoxGeometry(roofLen, h.roofThickness, roofDepth),
+      glassMat(CONFIG.COLORS.navy, 0.4, 0.08)
+    );
+    roofB.position.set(roofRun / 2, h.wallHeight + h.roofHeight / 2, 0);
+    roofB.rotation.z = -roofAngle;
+    group.add(roofB);
+    registerPart(roofB);
+
+    const chimney = new THREE.Mesh(
+      new THREE.BoxGeometry(h.chimney.width, h.chimney.height, h.chimney.width),
+      glassMat(CONFIG.COLORS.navy, 0.45, 0.05)
+    );
+    chimney.position.set(h.width * 0.22, h.wallHeight + h.roofHeight * 0.65, h.depth * 0.15);
+    group.add(chimney);
+    registerPart(chimney);
+
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(h.doorWidth, h.doorHeight, 0.03),
+      glassMat(CONFIG.COLORS.navy, 0.3, 0.1)
+    );
+    door.position.set(0, h.doorHeight / 2, h.depth / 2 + 0.015);
+    group.add(door);
+    registerPart(door);
+
+    [-1, 1].forEach(side => {
+      const win = new THREE.Mesh(
+        new THREE.BoxGeometry(h.windowSize, h.windowSize, 0.03),
+        glassMat(CONFIG.COLORS.navy, 0.2, 0.15)
+      );
+      win.position.set(side * (h.width * 0.32), h.wallHeight * 0.62, h.depth / 2 + 0.015);
+      group.add(win);
+      registerPart(win);
+    });
+
+    return group;
+  }
+
+  function buildTree(colorHex){
+    const group = new THREE.Group();
+    const t = CONFIG.TREES;
+
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(t.trunkRadius, t.trunkRadius * 1.2, t.trunkHeight, 8),
+      glassMat(CONFIG.COLORS.trunk, 0.6, 0.05)
+    );
+    trunk.position.y = t.trunkHeight / 2;
+    group.add(trunk);
+    registerPart(trunk);
+
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(t.coneRadius, t.coneHeight, 8),
+      glassMat(colorHex, 0.4, 0.05)
+    );
+    cone.position.y = t.trunkHeight + t.coneHeight / 2 - 0.03;
+    group.add(cone);
+    registerPart(cone);
+
+    return group;
+  }
+
+  function buildCar(){
+    const c = CONFIG.CAR;
+    const group = new THREE.Group();
+    const wheels = [];
+
+    const wheelBaseY = c.wheelRadius;
+    const bodyBaseY = c.wheelRadius * 1.3;
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(c.bodyLength, c.bodyHeight, c.bodyWidth),
+      glassMat(CONFIG.COLORS.navy, 0.25, 0.2)
+    );
+    body.position.y = bodyBaseY + c.bodyHeight / 2;
+    group.add(body);
+    registerPart(body);
+
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(c.cabinLength, c.cabinHeight, c.cabinWidth),
+      glassMat(CONFIG.COLORS.cabinGlass, 0.15, 0.3)
+    );
+    cabin.position.set(c.cabinOffsetX, bodyBaseY + c.bodyHeight + c.cabinHeight / 2, 0);
+    group.add(cabin);
+    registerPart(cabin);
+
+    const headlight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.045, c.bodyWidth - c.lightStripWidth),
+      glassMat(CONFIG.COLORS.yellow, 0.2, 0.1)
+    );
+    headlight.position.set(c.bodyLength / 2 + 0.005, bodyBaseY + c.bodyHeight * 0.55, 0);
+    group.add(headlight);
+    registerPart(headlight);
+
+    const taillight = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.045, c.bodyWidth - c.lightStripWidth),
+      glassMat(CONFIG.COLORS.peach, 0.2, 0.1)
+    );
+    taillight.position.set(-(c.bodyLength / 2 + 0.005), bodyBaseY + c.bodyHeight * 0.55, 0);
+    group.add(taillight);
+    registerPart(taillight);
+
+    const wheelGeo = new THREE.CylinderGeometry(c.wheelRadius, c.wheelRadius, c.wheelWidth, 14);
+    wheelGeo.rotateX(Math.PI / 2);
+
+    [-1, 1].forEach(xSide => {
+      [-1, 1].forEach(zSide => {
+        const wheel = new THREE.Mesh(wheelGeo, glassMat(CONFIG.COLORS.navy, 0.5, 0.2));
+        wheel.position.set(xSide * c.axleInsetX, wheelBaseY, zSide * c.trackHalfWidth);
+        group.add(wheel);
+        registerPart(wheel);
+        wheels.push(wheel);
+      });
+    });
+
+    return { group, wheels };
+  }
+
+  world.add(buildTile());
+
+  const house = buildHouse();
+  house.position.set(0.35, groundY, -0.1);
+  world.add(house);
+
+  const treeColors = [CONFIG.COLORS.peach, CONFIG.COLORS.yellow];
+  CONFIG.TREES.positions.slice(0, CONFIG.TREES.count).forEach((pos, i) => {
+    const tree = buildTree(treeColors[i % treeColors.length]);
+    tree.position.set(pos.x, groundY, pos.z);
+    world.add(tree);
+  });
+
+  const car = buildCar();
+  car.group.position.set(CONFIG.CAR.start.x, groundY, CONFIG.CAR.start.z);
+  car.group.rotation.y = CONFIG.CAR.facingAngle;
+  car.prevX = CONFIG.CAR.start.x;
+  world.add(car.group);
+
+  const partSpan = CONFIG.BUILD.partSpan;
+  const step = parts.length > 1 ? (1 - partSpan) / (parts.length - 1) : 0;
+  parts.forEach((p, i) => {
+    p.appearAt = i * step;
+    p.duration = partSpan;
+  });
+
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  function clamp01(x){ return Math.min(1, Math.max(0, x)); }
+  function lerp(a, b, t){ return a + (b - a) * t; }
+
+  /* g runs 0 -> 1 as parts are sketched in, holds at 1, then runs back to 0
+     as the sketch is undrawn — applyDraw is symmetric so the reverse just
+     erases the same strokes it drew. */
+  function applyDraw(g){
+    const drawFrac = CONFIG.BUILD.drawFraction;
+    parts.forEach(p => {
+      const local = clamp01((g - p.appearAt) / p.duration);
+      const drawT = clamp01(local / drawFrac);
+      const solidT = clamp01((local - drawFrac) / (1 - drawFrac));
+      const drawEased = easeOutCubic(drawT);
+      const solidEased = easeOutCubic(solidT);
+
+      const count = Math.round(p.total * drawEased);
+      p.geometry.setDrawRange(0, count);
+      p.line.material.opacity = drawT > 0 ? CONFIG.LINE.opacity * (1 - 0.6 * solidEased) : 0;
+
+      p.mesh.material.opacity = solidEased;
+      p.mesh.scale.setScalar(0.9 + 0.1 * solidEased);
+    });
+  }
+
+  function assemblyAmountAt(t){
+    const B = CONFIG.BUILD;
+    const cycle = B.buildDuration + B.holdDuration + B.teardownDuration + B.restDuration;
+    const tm = t % cycle;
+    if (tm < B.buildDuration){
+      return tm / B.buildDuration;
+    }
+    if (tm < B.buildDuration + B.holdDuration){
+      return 1;
+    }
+    if (tm < B.buildDuration + B.holdDuration + B.teardownDuration){
+      return 1 - (tm - B.buildDuration - B.holdDuration) / B.teardownDuration;
+    }
+    return 0;
+  }
+
+  const pointer = { x: 0, y: 0 };
+  const parallax = { x: 0, y: 0 };
+
+  if (!isTouch && !reduceMotion){
+    window.addEventListener('pointermove', (e) => {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+    });
+  }
+
+  const baseY = world.position.y;
+  const clockStart = performance.now();
+  let lastFrameT = 0;
+  let motionTime = 0;
+
+  function parkCarStatic(){
+    car.group.position.x = CONFIG.CAR.park.x;
+    car.group.position.z = CONFIG.CAR.park.z;
+  }
+
+  function renderStaticFrame(){
+    applyDraw(1);
+    parkCarStatic();
+    world.rotation.y = CONFIG.MOTION.staticRestAngle;
+    renderer.render(scene, camera);
+  }
+
+  function tick(){
+    const t = (performance.now() - clockStart) / 1000;
+    const dt = t - lastFrameT;
+    lastFrameT = t;
+
+    const B = CONFIG.BUILD;
+    const cycle = B.buildDuration + B.holdDuration + B.teardownDuration + B.restDuration;
+    const tm = t % cycle;
+    const isDrawing = tm < B.buildDuration;
+    const g = assemblyAmountAt(t);
+
+    applyDraw(g);
+
+    /* The scene only moves once the sketch is fully drawn — it holds
+       still while a part is actively being traced or erased. */
+    if (!isDrawing) motionTime += dt;
+
+    world.rotation.y = motionTime * CONFIG.MOTION.rotationSpeed;
+    world.position.y = baseY + Math.sin(motionTime * CONFIG.MOTION.bobSpeed) * CONFIG.MOTION.bobAmount;
+
+    parallax.x += (pointer.x - parallax.x) * CONFIG.MOTION.parallaxEase;
+    parallax.y += (pointer.y - parallax.y) * CONFIG.MOTION.parallaxEase;
+    world.rotation.x = -parallax.y * CONFIG.MOTION.parallaxStrength * 0.5;
+    world.rotation.y += parallax.x * CONFIG.MOTION.parallaxStrength;
+
+    const c = CONFIG.CAR;
+    let carX = c.start.x, carZ = c.start.z;
+    if (!isDrawing){
+      const holdT = tm - B.buildDuration;
+      const driveLocal = clamp01((holdT - c.driveDelay) / c.driveDuration);
+      const eased = easeOutCubic(driveLocal);
+      carX = lerp(c.start.x, c.park.x, eased);
+      carZ = lerp(c.start.z, c.park.z, eased);
+    }
+    const deltaX = carX - car.prevX;
+    const spin = deltaX / c.wheelRadius;
+    car.wheels.forEach(w => { w.rotation.z += spin; });
+    car.group.position.x = carX;
+    car.group.position.z = carZ;
+    car.prevX = carX;
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+
+  if (reduceMotion){
+    renderStaticFrame();
+  } else {
+    tick();
+  }
+
+  window.addEventListener('resize', () => {
+    const size = containerSize();
+    camera.aspect = size.w / size.h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(size.w, size.h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.RENDER.pixelRatioCap));
+    if (reduceMotion) renderer.render(scene, camera);
+  });
+
+})();
+</script>
+<script src="assets/js/main.js"></script>
+<script>
+// Prevent the static enquiry form from doing a real GET submit until Zoho is wired up.
+document.querySelector('[data-enquiry-form]').addEventListener('submit', function (e) {
+  e.preventDefault();
+  alert('This form is a design preview. Connect it to Zoho CRM before go-live.');
+});
+</script>
+</body>
+</html>
