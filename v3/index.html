@@ -377,11 +377,12 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   var CONFIG = {
 
     COLORS: {
-      navy:      0x001C44,
-      navyDark:  0x000C22,
-      navyLight: 0x1C4E86,
-      skyblue:   0x54B4F6,
-      white:     0xFFFFFF,
+      navy:       0x001C44,
+      navyDark:   0x000C22,
+      navyLight:  0x1C4E86,
+      skyblue:    0x54B4F6,
+      white:      0xFFFFFF,
+      specialRim: 0x2E86D8,
     },
     COLOR_STRINGS: {
       navy:      '#001C44',
@@ -433,8 +434,10 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
 
     WORDS: ['PERSONAL', 'PROPERTY', 'COMMERCIAL', 'VENDOR'],
     COIN_COUNT: 12,
-    COIN_RADIUS_MIN: 0.48,
-    COIN_RADIUS_MAX: 0.8,
+    SPECIAL_WORDS: ['PERFECT CHOICE', 'BEST FIT SOLUTION'],
+    SPECIAL_COIN_COUNT: 2,
+    COIN_RADIUS_MIN: 0.4,
+    COIN_RADIUS_MAX: 0.66,
     COIN_THICKNESS_RATIO: 0.11,
     COIN_SEGMENTS: 56,
 
@@ -451,7 +454,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     COIN_SPREAD_X_RIGHT: 3.6,
     COIN_SPREAD_Y: 3.2,
     COIN_SPREAD_Z: 2.7,
-    MIN_GAP: 0.5,
+    MIN_GAP: 0.85,
     INITIAL_SEPARATION_ITERATIONS: 280,
     LIVE_SEPARATION_ITERATIONS: 4,
     LIVE_SEPARATION_STRENGTH: 0.18,
@@ -653,20 +656,38 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     return canvas2;
   }
 
+  // Splits multi-word labels (e.g. "PERFECT CHOICE") onto stacked lines so
+  // long text still reads clearly on a small coin face, and shrinks the
+  // font until every line clears the max-width budget.
+  function computeWordLayout(ctx, word, size) {
+    var lines = word.split(' ');
+    var maxWidth = size * CONFIG.WORD_MAX_WIDTH_RATIO;
+    var fontSize = lines.length > 1 ? size * 0.24 : size * 0.34;
+    ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
+    function widest() {
+      var m = 0;
+      lines.forEach(function (l) { m = Math.max(m, ctx.measureText(l).width); });
+      return m;
+    }
+    while (widest() > maxWidth && fontSize > 10) {
+      fontSize -= 2;
+      ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
+    }
+    return { lines: lines, fontSize: fontSize };
+  }
+
   function heightFromWord(word) {
     var b = blankHeightCanvas();
     var canvas2 = b.canvas, ctx = b.ctx, size = b.size;
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    var maxWidth = size * CONFIG.WORD_MAX_WIDTH_RATIO;
-    var fontSize = size * 0.34;
-    ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
-    while (ctx.measureText(word).width > maxWidth && fontSize > 10) {
-      fontSize -= 2;
-      ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
-    }
-    ctx.fillText(word, size / 2, size / 2 + fontSize * 0.03);
+    var layout = computeWordLayout(ctx, word, size);
+    var lineHeight = layout.fontSize * 1.05;
+    var startY = size / 2 - (layout.lines.length - 1) * lineHeight / 2;
+    layout.lines.forEach(function (line, i) {
+      ctx.fillText(line, size / 2, startY + i * lineHeight + layout.fontSize * 0.03);
+    });
     return canvas2;
   }
 
@@ -729,42 +750,65 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     return tex;
   }
 
-  function buildWordColorTexture(word) {
+  // `special` renders the highlight coin's sky-blue face: a lighter,
+  // more saturated blue base with a dark-navy outline behind the white
+  // fill so the embossed text keeps strong contrast on the brighter base.
+  function buildWordColorTexture(word, special) {
     var size = 256;
     var c = document.createElement('canvas');
     c.width = size; c.height = size;
     var ctx = c.getContext('2d');
 
     var grad = ctx.createLinearGradient(0, 0, size, size);
-    grad.addColorStop(0,    CONFIG.COLOR_STRINGS.navyDark);
-    grad.addColorStop(0.55, CONFIG.COLOR_STRINGS.navy);
-    grad.addColorStop(1,    CONFIG.COLOR_STRINGS.navyLight);
+    if (special) {
+      grad.addColorStop(0,   CONFIG.COLOR_STRINGS.navyLight);
+      grad.addColorStop(0.5, CONFIG.COLOR_STRINGS.skyblue);
+      grad.addColorStop(1,   CONFIG.COLOR_STRINGS.navyLight);
+    } else {
+      grad.addColorStop(0,    CONFIG.COLOR_STRINGS.navyDark);
+      grad.addColorStop(0.55, CONFIG.COLOR_STRINGS.navy);
+      grad.addColorStop(1,    CONFIG.COLOR_STRINGS.navyLight);
+    }
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    var maxWidth = size * CONFIG.WORD_MAX_WIDTH_RATIO;
-    var fontSize = size * 0.34;
-    ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
-    while (ctx.measureText(word).width > maxWidth && fontSize > 10) {
-      fontSize -= 2;
-      ctx.font = CONFIG.WORD_FONT_WEIGHT + ' ' + fontSize + 'px ' + CONFIG.WORD_FONT_FAMILY;
-    }
-    var ty = size / 2 + fontSize * 0.03;
+    var layout = computeWordLayout(ctx, word, size);
+    var lineHeight = layout.fontSize * 1.05;
+    var startY = size / 2 - (layout.lines.length - 1) * lineHeight / 2;
 
-    ctx.shadowColor = CONFIG.COLOR_STRINGS.skyblue;
-    ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW;
-    ctx.fillStyle = CONFIG.COLOR_STRINGS.skyblue;
-    ctx.fillText(word, size / 2, ty);
-    ctx.fillText(word, size / 2, ty);
+    layout.lines.forEach(function (line, i) {
+      var ty = startY + i * lineHeight + layout.fontSize * 0.03;
 
-    ctx.shadowColor = CONFIG.COLOR_STRINGS.white;
-    ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW * 0.4;
-    ctx.fillStyle = CONFIG.COLOR_STRINGS.white;
-    ctx.fillText(word, size / 2, ty);
-    ctx.shadowBlur = 0;
-    ctx.fillText(word, size / 2, ty);
+      if (special) {
+        ctx.lineJoin = 'round';
+        ctx.miterLimit = 2;
+        ctx.strokeStyle = CONFIG.COLOR_STRINGS.navyDark;
+        ctx.lineWidth = layout.fontSize * 0.16;
+        ctx.strokeText(line, size / 2, ty);
+
+        ctx.shadowColor = CONFIG.COLOR_STRINGS.white;
+        ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW * 1.5;
+        ctx.fillStyle = CONFIG.COLOR_STRINGS.white;
+        ctx.fillText(line, size / 2, ty);
+        ctx.shadowBlur = 0;
+        ctx.fillText(line, size / 2, ty);
+      } else {
+        ctx.shadowColor = CONFIG.COLOR_STRINGS.skyblue;
+        ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW;
+        ctx.fillStyle = CONFIG.COLOR_STRINGS.skyblue;
+        ctx.fillText(line, size / 2, ty);
+        ctx.fillText(line, size / 2, ty);
+
+        ctx.shadowColor = CONFIG.COLOR_STRINGS.white;
+        ctx.shadowBlur = size * CONFIG.WORD_HIGHLIGHT_GLOW * 0.4;
+        ctx.fillStyle = CONFIG.COLOR_STRINGS.white;
+        ctx.fillText(line, size / 2, ty);
+        ctx.shadowBlur = 0;
+        ctx.fillText(line, size / 2, ty);
+      }
+    });
 
     var tex = new THREE.CanvasTexture(c);
     tex.encoding = THREE.sRGBEncoding;
@@ -826,22 +870,41 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     var capGradientTex = buildCapGradientTexture();
     var wordColorTextures = {};
     CONFIG.WORDS.forEach(function (w) { wordColorTextures[w] = buildWordColorTexture(w); });
+    var specialColorTextures = {};
+    CONFIG.SPECIAL_WORDS.forEach(function (w) { specialColorTextures[w] = buildWordColorTexture(w, true); });
 
     var logoNormal = normalMapFromHeight(heightFromImage(logoImg, CONFIG.LOGO_SCALE));
     var wordNormals = {};
     CONFIG.WORDS.forEach(function (w) { wordNormals[w] = normalMapFromHeight(heightFromWord(w)); });
+    var specialNormals = {};
+    CONFIG.SPECIAL_WORDS.forEach(function (w) { specialNormals[w] = normalMapFromHeight(heightFromWord(w)); });
 
     var deck = [];
     for (var i = 0; i < CONFIG.COIN_COUNT; i++) {
-      deck.push({ word: CONFIG.WORDS[i % CONFIG.WORDS.length] });
+      deck.push({ word: CONFIG.WORDS[i % CONFIG.WORDS.length], special: false });
+    }
+    // Two "best fit" highlight coins: one riding near the top of the
+    // cluster, one nearer the vertical middle, so the callout reads at a
+    // glance regardless of how the rest of the deck settles.
+    var bands = ['top', 'middle'];
+    for (var s = 0; s < CONFIG.SPECIAL_COIN_COUNT; s++) {
+      deck.push({ word: CONFIG.SPECIAL_WORDS[s % CONFIG.SPECIAL_WORDS.length], special: true, band: bands[s % bands.length] });
     }
 
     var candidates = deck.map(function (def) {
-      var radius = THREE.MathUtils.lerp(CONFIG.COIN_RADIUS_MIN, CONFIG.COIN_RADIUS_MAX, Math.random());
-      var xReach = Math.random() < 0.5 ? -CONFIG.COIN_SPREAD_X_LEFT : CONFIG.COIN_SPREAD_X_RIGHT;
+      var radius = def.special
+        ? THREE.MathUtils.lerp(CONFIG.COIN_RADIUS_MAX * 0.85, CONFIG.COIN_RADIUS_MAX, Math.random())
+        : THREE.MathUtils.lerp(CONFIG.COIN_RADIUS_MIN, CONFIG.COIN_RADIUS_MAX, Math.random());
+      var xReach = Math.random() < (def.special ? 0.15 : 0.5) ? -CONFIG.COIN_SPREAD_X_LEFT : CONFIG.COIN_SPREAD_X_RIGHT;
+      var yRange = [-CONFIG.COIN_SPREAD_Y, CONFIG.COIN_SPREAD_Y];
+      if (def.special) {
+        yRange = def.band === 'top'
+          ? [CONFIG.COIN_SPREAD_Y * 0.45, CONFIG.COIN_SPREAD_Y * 0.95]
+          : [-CONFIG.COIN_SPREAD_Y * 0.3, CONFIG.COIN_SPREAD_Y * 0.3];
+      }
       var pos = new THREE.Vector3(
         Math.random() * xReach,
-        (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Y * 2,
+        THREE.MathUtils.lerp(yRange[0], yRange[1], Math.random()),
         (Math.random() - 0.5) * CONFIG.COIN_SPREAD_Z * 2
       );
       return { def: def, radius: radius, pos: pos, fixed: false };
@@ -866,7 +929,7 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
       var geo = new THREE.CylinderGeometry(c.radius, c.radius, thickness, CONFIG.COIN_SEGMENTS);
 
       var rimMat = new THREE.MeshPhysicalMaterial({
-        color: CONFIG.COLORS.navy,
+        color: c.def.special ? CONFIG.COLORS.specialRim : CONFIG.COLORS.navy,
         metalness: CONFIG.MATERIAL.metalness,
         roughness: CONFIG.MATERIAL.roughness,
         clearcoat: CONFIG.MATERIAL.clearcoat,
@@ -877,8 +940,8 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
         emissiveIntensity: 0,
       });
 
-      var topNormal = wordNormals[c.def.word];
-      var topColorMap = wordColorTextures[c.def.word];
+      var topNormal = c.def.special ? specialNormals[c.def.word] : wordNormals[c.def.word];
+      var topColorMap = c.def.special ? specialColorTextures[c.def.word] : wordColorTextures[c.def.word];
       var bottomNormal = logoNormal;
 
       var topMat = rimMat.clone();
@@ -924,6 +987,29 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   var pointerNDC = new THREE.Vector2();
   var dragState = null;
 
+  /* Whole-scene orbit: dragging empty space (not a coin) rotates the entire
+     cluster so every coin can be brought into view, with a bit of momentum
+     on release. This is layered on top of the ambient auto-spin/tilt rather
+     than replacing it. */
+  var ORBIT_DRAG_SPEED = 0.006;
+  var ORBIT_TILT_MAX = 0.32; // kept within the camera's original safe tilt range
+  var ORBIT_MOMENTUM_DECAY = 0.94;
+  var orbitOffset = { x: 0, y: 0 };
+  var orbitVelocity = { x: 0, y: 0 };
+  var orbitState = null;
+
+  function startOrbitDrag(evt) {
+    canvas.setPointerCapture(evt.pointerId);
+    orbitState = {
+      pointerId: evt.pointerId,
+      lastClientX: evt.clientX,
+      lastClientY: evt.clientY,
+      lastTime: performance.now(),
+    };
+    canvas.classList.add('is-dragging');
+    evt.preventDefault();
+  }
+
   function setPointerNDCFromEvent(evt) {
     var rect = canvas.getBoundingClientRect();
     pointerNDC.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
@@ -939,7 +1025,10 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     if (evt.button !== undefined && evt.button !== 0) return;
     setPointerNDCFromEvent(evt);
     var hits = hitTestCoins();
-    if (hits.length === 0) return;
+    if (hits.length === 0) {
+      startOrbitDrag(evt);
+      return;
+    }
 
     var coin = hits[0].object;
     canvas.setPointerCapture(evt.pointerId);
@@ -972,6 +1061,26 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   }
 
   function onPointerMove(evt) {
+    if (orbitState && evt.pointerId === orbitState.pointerId) {
+      var dx = evt.clientX - orbitState.lastClientX;
+      var dy = evt.clientY - orbitState.lastClientY;
+      var now = performance.now();
+      var dt = Math.max((now - orbitState.lastTime) / 1000, 1 / 120);
+
+      orbitOffset.y += dx * ORBIT_DRAG_SPEED;
+      orbitOffset.x = THREE.MathUtils.clamp(orbitOffset.x + dy * ORBIT_DRAG_SPEED, -ORBIT_TILT_MAX, ORBIT_TILT_MAX);
+      orbitVelocity.y = (dx * ORBIT_DRAG_SPEED) / dt;
+      orbitVelocity.x = (dy * ORBIT_DRAG_SPEED) / dt;
+
+      orbitState.lastClientX = evt.clientX;
+      orbitState.lastClientY = evt.clientY;
+      orbitState.lastTime = now;
+
+      if (reducedMotion) renderOnce();
+      evt.preventDefault();
+      return;
+    }
+
     if (!dragState || evt.pointerId !== dragState.pointerId) {
       setPointerNDCFromEvent(evt);
       canvas.style.cursor = (!dragState && hitTestCoins().length) ? 'grab' : (dragState ? 'grabbing' : 'grab');
@@ -1028,6 +1137,12 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
   }
 
   function onPointerUp(evt) {
+    if (orbitState && evt.pointerId === orbitState.pointerId) {
+      orbitState = null;
+      canvas.classList.remove('is-dragging');
+      canvas.style.cursor = 'grab';
+      return;
+    }
     if (!dragState || evt.pointerId !== dragState.pointerId) return;
     var coin = dragState.coin;
     coin.userData.isDragging = false;
@@ -1125,8 +1240,16 @@ button{font-family:inherit;border:none;background:none;padding:0;cursor:pointer;
     separationPass(items, CONFIG.LIVE_SEPARATION_ITERATIONS, CONFIG.MIN_GAP, CONFIG.LIVE_SEPARATION_STRENGTH);
     coinsGroup.children.forEach(function (m) { if (!m.userData.isDragging) clampToBounds(m.position); });
 
-    cluster.rotation.y = t * CONFIG.CLUSTER_SPIN_SPEED_Y;
-    cluster.rotation.x = CONFIG.CLUSTER_BASE_TILT_X;
+    if (!orbitState) {
+      orbitOffset.x += orbitVelocity.x;
+      orbitOffset.y += orbitVelocity.y;
+      orbitOffset.x = THREE.MathUtils.clamp(orbitOffset.x, -ORBIT_TILT_MAX, ORBIT_TILT_MAX);
+      orbitVelocity.x *= ORBIT_MOMENTUM_DECAY;
+      orbitVelocity.y *= ORBIT_MOMENTUM_DECAY;
+    }
+
+    cluster.rotation.y = t * CONFIG.CLUSTER_SPIN_SPEED_Y + orbitOffset.y;
+    cluster.rotation.x = CONFIG.CLUSTER_BASE_TILT_X + orbitOffset.x;
 
     pointerCurrent.x += (pointerTarget.x - pointerCurrent.x) * CONFIG.POINTER_TILT_EASE;
     pointerCurrent.y += (pointerTarget.y - pointerCurrent.y) * CONFIG.POINTER_TILT_EASE;

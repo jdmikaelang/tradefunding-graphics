@@ -790,13 +790,12 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
   var BLUE = 0x54B4F6;
 
   var PRODUCTS = [
-    { label: "Business Term Loans", channel: "A lump sum with fixed repayments for growth or working capital." },
-    { label: "Business Line of Credit", channel: "Draw funds as you need them, pay interest only on what you use." },
-    { label: "Chattel Mortgage", channel: "Own equipment from day one while spreading out the cost." },
-    { label: "Vendor Finance", channel: "Connect" },
-    { label: "Point-of-Sale Finance", channel: "Connect" },
-    { label: "Self-Employed Home Loan", channel: "A home loan built around self-employed income." },
-    { label: "Second Mortgage", channel: "Access equity in property without refinancing." }
+    { label: "Business Loans", channel: "Fixed or flexible terms for growth, stock or cashflow." },
+    { label: "Lines of Credit", channel: "Draw what you need, pay interest only on what you use." },
+    { label: "Invoice Finance", channel: "Turn unpaid invoices into working capital in days." },
+    { label: "Trade Finance", channel: "Fund stock and supplier payments across the supply chain." },
+    { label: "Equipment Finance", channel: "Chattel mortgage, finance lease or operating lease." },
+    { label: "Chattel Mortgage", channel: "Own equipment from day one while spreading out the cost." }
   ];
 
   var stage = document.getElementById('hero-scene-stage');
@@ -926,16 +925,18 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
     stripe.position.set(0.2, -BLADE_H / 2 + 0.26, 0.034);
     body.add(stripe);
 
-    var nameTex = makeLabelTexture(product.label, '#ffffff', 34);
+    // Heading sits beside the chip (the small rectangle box), both riding
+    // the top edge of the card, rather than stacked below it.
+    var nameTex = makeLabelTexture(product.label, '#ffffff', 30);
     var nameMat = new THREE.MeshBasicMaterial({ map: nameTex, transparent: true });
-    var namePlane = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.4), nameMat);
-    namePlane.position.set(0, BLADE_H / 2 - 0.42, 0.038);
+    var namePlane = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.3), nameMat);
+    namePlane.position.set(0.19, BLADE_H / 2 - 0.26, 0.038);
     body.add(namePlane);
 
     var descTex = makeLabelTexture(product.channel, 'rgba(255,255,255,0.75)', 26);
     var descMat = new THREE.MeshBasicMaterial({ map: descTex, transparent: true });
-    var descPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.34), descMat);
-    descPlane.position.set(0, -0.04, 0.038);
+    var descPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.4), descMat);
+    descPlane.position.set(0, -0.1, 0.038);
     body.add(descPlane);
 
     body.userData = {

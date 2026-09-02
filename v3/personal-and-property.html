@@ -13,10 +13,11 @@
 .hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 540px;gap:32px;align-items:center;align-content:center}
 .hero-title{margin:22px 0 0;font-weight:600;font-size:clamp(2.1rem,3.6vw,3rem);line-height:1.08;letter-spacing:var(--ls-heading);color:var(--navy);max-width:560px}
 .hero-sub{margin:22px 0 0;font-size:1.05rem;color:var(--text-secondary);line-height:1.7;max-width:480px}
-.hero-anim{position:relative;width:100%;aspect-ratio:1/1;max-height:540px;margin-left:-24px}
-.hero-anim canvas{display:block;width:100%;height:100%}
+.hero-anim{position:relative;width:100%;aspect-ratio:1/1;max-height:540px;margin-left:-24px;overflow:visible}
+.hero-anim canvas{display:block;width:100%;height:100%;transform:scale(1.28) translateX(-9%);transform-origin:center center}
 @media (max-width:900px){
   .hero-anim{margin-left:0}
+  .hero-anim canvas{transform:scale(1.12) translateX(-4%)}
 }
 
 .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap-card)}
@@ -428,7 +429,7 @@
       driveDuration: 2.2
     },
     MOTION: {
-      rotationSpeed: 0.07,
+      rotationSpeed: 0.03,
       bobAmount: 0.04,
       bobSpeed: 0.4,
       staticRestAngle: 0.55,
@@ -437,9 +438,6 @@
     },
     BUILD: {
       buildDuration: 5.0,
-      holdDuration: 3.2,
-      teardownDuration: 3.0,
-      restDuration: 1.0,
       partSpan: 0.34,
       drawFraction: 0.55
     },
@@ -470,6 +468,11 @@
   }
 
   const camera = new THREE.PerspectiveCamera(CONFIG.CAMERA.fov, containerSize().w / containerSize().h, 0.1, 100);
+  // Keep the camera at its original tuned framing — this is what already
+  // guarantees the car's full drive/park orbit and the rotating house never
+  // clip. "Bigger and shifted left" is applied as a pure CSS transform on
+  // the canvas instead (see .hero-anim canvas), which can't reintroduce
+  // 3D clipping since it never changes what the camera actually frames.
   camera.position.set(CONFIG.CAMERA.position.x, CONFIG.CAMERA.position.y, CONFIG.CAMERA.position.z);
   camera.lookAt(CONFIG.CAMERA.lookAt.x, CONFIG.CAMERA.lookAt.y, CONFIG.CAMERA.lookAt.z);
 
@@ -745,20 +748,10 @@
     });
   }
 
+  /* One-shot: sketches in once over buildDuration, then holds fully built
+     forever — no teardown, no repeat. */
   function assemblyAmountAt(t){
-    const B = CONFIG.BUILD;
-    const cycle = B.buildDuration + B.holdDuration + B.teardownDuration + B.restDuration;
-    const tm = t % cycle;
-    if (tm < B.buildDuration){
-      return tm / B.buildDuration;
-    }
-    if (tm < B.buildDuration + B.holdDuration){
-      return 1;
-    }
-    if (tm < B.buildDuration + B.holdDuration + B.teardownDuration){
-      return 1 - (tm - B.buildDuration - B.holdDuration) / B.teardownDuration;
-    }
-    return 0;
+    return clamp01(t / CONFIG.BUILD.buildDuration);
   }
 
   const pointer = { x: 0, y: 0 };
@@ -770,6 +763,40 @@
       pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
     });
   }
+
+  // ---- drag to rotate: lets the viewer spin the house around to see it
+  // from any side, layered on top of the ambient auto-rotation ----
+  const dragRotation = { y: 0 };
+  const dragVelocity = { y: 0 };
+  let dragState = null;
+  const DRAG_SPEED = 0.008;
+  const DRAG_DECAY = 0.94;
+
+  canvas.style.cursor = 'grab';
+  canvas.style.touchAction = 'none';
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    canvas.setPointerCapture(e.pointerId);
+    dragState = { pointerId: e.pointerId, lastX: e.clientX };
+    canvas.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    const dx = e.clientX - dragState.lastX;
+    dragRotation.y += dx * DRAG_SPEED;
+    dragVelocity.y = dx * DRAG_SPEED;
+    dragState.lastX = e.clientX;
+    e.preventDefault();
+  });
+  function endDrag(e){
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    dragState = null;
+    canvas.style.cursor = 'grab';
+  }
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
 
   const baseY = world.position.y;
   const clockStart = performance.now();
@@ -794,9 +821,7 @@
     lastFrameT = t;
 
     const B = CONFIG.BUILD;
-    const cycle = B.buildDuration + B.holdDuration + B.teardownDuration + B.restDuration;
-    const tm = t % cycle;
-    const isDrawing = tm < B.buildDuration;
+    const isDrawing = t < B.buildDuration;
     const g = assemblyAmountAt(t);
 
     applyDraw(g);
@@ -813,10 +838,16 @@
     world.rotation.x = -parallax.y * CONFIG.MOTION.parallaxStrength * 0.5;
     world.rotation.y += parallax.x * CONFIG.MOTION.parallaxStrength;
 
+    if (!dragState){
+      dragRotation.y += dragVelocity.y;
+      dragVelocity.y *= DRAG_DECAY;
+    }
+    world.rotation.y += dragRotation.y;
+
     const c = CONFIG.CAR;
     let carX = c.start.x, carZ = c.start.z;
     if (!isDrawing){
-      const holdT = tm - B.buildDuration;
+      const holdT = t - B.buildDuration;
       const driveLocal = clamp01((holdT - c.driveDelay) / c.driveDuration);
       const eased = easeOutCubic(driveLocal);
       carX = lerp(c.start.x, c.park.x, eased);

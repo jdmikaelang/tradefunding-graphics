@@ -10,16 +10,18 @@
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/components.css">
 <style>
-.hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:7fr 5fr;gap:48px;align-items:center;align-content:center}
+.hero-grid{max-width:var(--max-width-wide);margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;align-content:center}
 .hero-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .hero-title{font-weight:600;font-size:clamp(2.4rem,4.2vw,3.5rem);line-height:1.08;letter-spacing:var(--ls-heading);color:var(--navy);margin-bottom:20px}
 .hero-sub{font-size:1.05rem;color:var(--text-secondary);line-height:1.65;max-width:420px;margin-bottom:32px}
 
 .checkout-row{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--ink-600);margin-bottom:6px}
 
-/* Hero 3D scene — matches the floating glass-card language used on Commercial / Personal & Property */
-.scene-stage{position:relative;height:660px;overflow:visible}
-.scene-stage canvas{display:block;width:100%;height:100%}
+/* Hero 3D scene — matches the floating glass-card language used on Commercial / Personal & Property.
+   aspect-ratio keeps the stage box the same shape as the card group's own
+   bounding box, so the fit-to-frame camera fills it with no dead margin. */
+.scene-stage{position:relative;width:100%;aspect-ratio:1.42/1;overflow:visible}
+.scene-stage canvas{display:block;width:100%;height:100%;transform:scale(1.18) translateX(-7%);transform-origin:center center}
 
 .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap-card)}
 .proof-stat{font-family:var(--font-heading);font-weight:600;font-size:clamp(1.7rem,2.6vw,2.1rem);color:var(--navy);margin-bottom:8px}
@@ -50,7 +52,7 @@
 
 @media (max-width:900px){
   .hero-grid{grid-template-columns:1fr}
-  .scene-stage{height:460px}
+  .scene-stage canvas{transform:scale(1.05) translateX(-3%)}
   .compare-cols{grid-template-columns:1fr}
   .steps-grid{grid-template-columns:1fr 1fr}
   .proof-grid{grid-template-columns:1fr 1fr}
@@ -393,9 +395,9 @@
   var stage = document.getElementById('hero-3d-stage');
   if (!stage || typeof THREE === 'undefined') return;
 
-  var NAVY = 0x001C44;
+  var NAVY = 0x000C22; // --navy-deep — reads as true dark navy against the glow accents
   var SKYBLUE = 0x54B4F6;
-  var PEACH = 0xFF5D5C;
+  var PEACH = 0xFF5D5C; // matches --peach token used site-wide (same as the Personal & Property tree)
 
   var width = stage.clientWidth || 1;
   var height = stage.clientHeight || 1;
@@ -409,16 +411,19 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(width, height);
   renderer.outputEncoding = THREE.sRGBEncoding;
-  stage.appendChild(renderer.domElement);
+  var canvas = renderer.domElement;
+  canvas.style.cursor = 'grab';
+  canvas.style.touchAction = 'none';
+  stage.appendChild(canvas);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xbfe0ff, 1.05));
-  var keyLight = new THREE.DirectionalLight(0xffffff, 1.15);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xbfe0ff, 1.0));
+  var keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
   keyLight.position.set(4, 6, 5);
   scene.add(keyLight);
-  var fillLight = new THREE.DirectionalLight(0xbcd0f2, 0.45);
+  var fillLight = new THREE.DirectionalLight(0xbcd0f2, 0.3);
   fillLight.position.set(-5, -1, -3);
   scene.add(fillLight);
-  var accentLight = new THREE.PointLight(SKYBLUE, 1.2, 14);
+  var accentLight = new THREE.PointLight(SKYBLUE, 0.55, 14);
   accentLight.position.set(0.5, 1.4, 4);
   scene.add(accentLight);
 
@@ -473,53 +478,37 @@
     group.add(line);
   }
 
-  function labelTexture(lines, color) {
-    var c = document.createElement('canvas');
-    c.width = 420; c.height = 140;
-    var ctx = c.getContext('2d');
-    ctx.textBaseline = 'middle';
-    lines.forEach(function (line, i) {
-      ctx.font = line.weight + ' ' + line.size + 'px "DM Sans", sans-serif';
-      ctx.fillStyle = color;
-      ctx.globalAlpha = line.alpha === undefined ? 1 : line.alpha;
-      ctx.letterSpacing = (line.tracking || 0) + 'px';
-      ctx.fillText(line.text, 6, line.y);
-    });
-    var tex = new THREE.CanvasTexture(c);
-    tex.encoding = THREE.sRGBEncoding;
-    return tex;
-  }
-
   // ============================================================
   // CARD 1 — back-left: approval-rate ring gauge, dim navy glass
   // ============================================================
   var card1 = new THREE.Group();
-  var card1Mesh = new THREE.Mesh(cardGeometry(1.7, 2.05), glassMat(NAVY, 0.28, 0.3, 1));
+  var card1Mesh = new THREE.Mesh(cardGeometry(1.7, 2.05), glassMat(NAVY, 0.42, 0.1, 1));
   card1.add(card1Mesh);
   addCardRim(card1Mesh, card1, SKYBLUE, 0.35);
 
+  var RING_RADIUS = 0.58;
+  var ringGroup = new THREE.Group();
+  ringGroup.position.set(0, 0.05, 0.09);
+  card1.add(ringGroup);
+
   var ringBg = new THREE.Mesh(
-    new THREE.TorusGeometry(0.42, 0.055, 20, 48),
+    new THREE.TorusGeometry(RING_RADIUS, 0.06, 20, 48),
     new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, transparent: true, opacity: 0.16 })
   );
-  ringBg.position.set(0, 0.28, 0.09);
-  card1.add(ringBg);
+  ringGroup.add(ringBg);
 
   var ringArc = new THREE.Mesh(
-    new THREE.TorusGeometry(0.42, 0.055, 20, 48, Math.PI * 1.45),
-    new THREE.MeshPhysicalMaterial({ color: PEACH, roughness: 0.25, metalness: 0.2, emissive: 0x4a1210, emissiveIntensity: 0.35 })
+    new THREE.TorusGeometry(RING_RADIUS, 0.06, 20, 48, Math.PI * 1.45),
+    new THREE.MeshPhysicalMaterial({ color: PEACH, roughness: 0.55, metalness: 0.02 })
   );
-  ringArc.position.set(0, 0.28, 0.09);
   ringArc.rotation.z = Math.PI / 2;
-  card1.add(ringArc);
+  ringGroup.add(ringArc);
 
-  var pctTex = labelTexture([
-    { text: '72%', size: 46, weight: '700', y: 60 },
-    { text: 'APPROVAL RATE', size: 15, weight: '600', y: 108, alpha: 0.55, tracking: 1 }
-  ], '#ffffff');
-  var pctPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.34), new THREE.MeshBasicMaterial({ map: pctTex, transparent: true }));
-  pctPlane.position.set(-0.05, -0.42, 0.095);
-  card1.add(pctPlane);
+  function updateRing(t) {
+    ringGroup.rotation.z = t * 0.32;
+    var pulse = 1 + Math.sin(t * 0.75) * 0.06;
+    ringGroup.scale.set(pulse, pulse, pulse);
+  }
 
   card1.position.set(-1.55, -0.15, -0.55);
   card1.rotation.set(-0.04, 0.5, -0.02);
@@ -529,27 +518,20 @@
   // CARD 2 — middle: monthly-volume bar chart, navy glass
   // ============================================================
   var card2 = new THREE.Group();
-  var card2Mesh = new THREE.Mesh(cardGeometry(1.9, 2.3), glassMat(0x155DA6, 0.26, 0.35, 1));
+  var card2Mesh = new THREE.Mesh(cardGeometry(1.9, 2.3), glassMat(SKYBLUE, 0.35, 0.05, 1));
   card2.add(card2Mesh);
-  addCardRim(card2Mesh, card2, SKYBLUE, 0.45);
+  addCardRim(card2Mesh, card2, NAVY, 0.35);
 
-  var barTitleTex = labelTexture([
-    { text: 'MONTHLY VOLUME', size: 15, weight: '600', y: 40, alpha: 0.55, tracking: 1 }
-  ], '#ffffff');
-  var barTitle = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.15), new THREE.MeshBasicMaterial({ map: barTitleTex, transparent: true }));
-  barTitle.position.set(-0.15, 0.92, 0.095);
-  card2.add(barTitle);
 
   var bars = [];
   var BAR_COUNT = 6;
   var BAR_AREA_W = 1.5;
-  var barAccentMat = new THREE.MeshPhysicalMaterial({ color: SKYBLUE, roughness: 0.3, metalness: 0.15, clearcoat: 0.5 });
-  var barDimMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, transparent: true, opacity: 0.3 });
   for (var i = 0; i < BAR_COUNT; i++) {
     var bw = BAR_AREA_W / BAR_COUNT * 0.5;
     var bgeo = new THREE.BoxGeometry(bw, 1, 0.05);
     bgeo.translate(0, 0.5, 0);
-    var bmesh = new THREE.Mesh(bgeo, i === BAR_COUNT - 2 ? barAccentMat : barDimMat);
+    var barMat = new THREE.MeshPhysicalMaterial({ color: NAVY, roughness: 0.35, metalness: 0.08, clearcoat: 0.5 });
+    var bmesh = new THREE.Mesh(bgeo, barMat);
     var bx = -BAR_AREA_W / 2 + (i + 0.5) * (BAR_AREA_W / BAR_COUNT);
     bmesh.position.set(bx - 0.15, -0.75, 0.11);
     card2.add(bmesh);
@@ -561,56 +543,114 @@
   world.add(card2);
 
   // ============================================================
-  // CARD 3 — front-right hero card: animated payout-trend wave,
-  // brighter glass to match the "front card glow" language
+  // CARD 3 — front-right hero card: a premium glowing growth chart —
+  // sky-blue ascending bars topped by a peach arrow that continuously
+  // draws itself upward, on the same navy glass as card 1.
   // ============================================================
+  function hexToRgb(hex) {
+    return { r: (hex >> 16) & 255, g: (hex >> 8) & 255, b: hex & 255 };
+  }
+  function buildGlowTexture(hex) {
+    var size = 128;
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var ctx = c.getContext('2d');
+    var rgb = hexToRgb(hex);
+    var rgbStr = rgb.r + ',' + rgb.g + ',' + rgb.b;
+    var grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, 'rgba(' + rgbStr + ',0.9)');
+    grad.addColorStop(0.5, 'rgba(' + rgbStr + ',0.32)');
+    grad.addColorStop(1, 'rgba(' + rgbStr + ',0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function addGlow(parent, hex, position, scale) {
+    var mat = new THREE.SpriteMaterial({
+      map: buildGlowTexture(hex), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+    });
+    var sprite = new THREE.Sprite(mat);
+    sprite.position.copy(position);
+    sprite.scale.set(scale, scale, 1);
+    parent.add(sprite);
+    return sprite;
+  }
+
   var card3 = new THREE.Group();
-  var card3Mesh = new THREE.Mesh(cardGeometry(2.3, 2.75), glassMat(0xffffff, 0.08, 0, 1));
+  var card3Mesh = new THREE.Mesh(cardGeometry(2.3, 2.75), glassMat(NAVY, 0.42, 0.1, 1));
   card3.add(card3Mesh);
-  addCardRim(card3Mesh, card3, NAVY, 0.18);
+  addCardRim(card3Mesh, card3, SKYBLUE, 0.35);
 
-  var headerTex = labelTexture([
-    { text: 'TRADE FUNDING', size: 17, weight: '700', y: 24, tracking: 1 }
-  ], '#001C44');
-  var header = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 0.14), new THREE.MeshBasicMaterial({ map: headerTex, transparent: true }));
-  header.position.set(-0.35, 1.15, 0.095);
-  card3.add(header);
 
-  var trendTex = labelTexture([
-    { text: 'PAYOUT TREND', size: 15, weight: '600', y: 40, alpha: 0.55, tracking: 1 }
-  ], '#001C44');
-  var trendLabel = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.15), new THREE.MeshBasicMaterial({ map: trendTex, transparent: true }));
-  trendLabel.position.set(-0.3, 0.6, 0.095);
-  card3.add(trendLabel);
+  // ---- ascending glow bars ----
+  var GROWTH_BASE_Y = -0.55;
+  var GROWTH_HEIGHTS = [0.22, 0.32, 0.28, 0.5, 0.44, 0.66];
+  var GROWTH_X = [-0.8, -0.5, -0.2, 0.1, 0.4, 0.7];
+  var growthBars = [];
+  GROWTH_HEIGHTS.forEach(function (h, i) {
+    var bgeo = new THREE.BoxGeometry(0.14, 1, 0.05);
+    bgeo.translate(0, 0.5, 0);
+    var mat = new THREE.MeshPhysicalMaterial({
+      color: SKYBLUE, roughness: 0.3, metalness: 0.1, emissive: SKYBLUE, emissiveIntensity: 0.8
+    });
+    var mesh = new THREE.Mesh(bgeo, mat);
+    mesh.scale.y = h;
+    mesh.position.set(GROWTH_X[i], GROWTH_BASE_Y, 0.11);
+    card3.add(mesh);
+    addGlow(card3, SKYBLUE, new THREE.Vector3(GROWTH_X[i], GROWTH_BASE_Y + h / 2, 0.13), 0.5);
+    growthBars.push({ mat: mat, phase: i * 0.5 });
+  });
 
-  var WAVE_POINTS = 22;
-  var WAVE_W = 1.7;
-  function wavePoints(t) {
+  // ---- peach arrow that continuously draws itself upward, riding just
+  // above the bar tops ----
+  var arrowPoints = GROWTH_X.map(function (x, i) {
+    return new THREE.Vector3(x, GROWTH_BASE_Y + GROWTH_HEIGHTS[i] + 0.12, 0.16);
+  });
+  var arrowCurve = new THREE.CatmullRomCurve3(arrowPoints);
+  var arrowMat = new THREE.MeshPhysicalMaterial({
+    color: PEACH, roughness: 0.4, metalness: 0.05, emissive: PEACH, emissiveIntensity: 0.8
+  });
+  var arrowMesh = new THREE.Mesh(new THREE.TubeGeometry(arrowCurve, 64, 0.026, 8, false), arrowMat);
+  card3.add(arrowMesh);
+
+  var arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 16), arrowMat);
+  card3.add(arrowHead);
+  var arrowHeadGlow = addGlow(card3, PEACH, arrowPoints[arrowPoints.length - 1], 0.45);
+
+  var ARROW_SAMPLES = 40;
+  var ARROW_DRAW_TIME = 4.2;
+  var ARROW_HOLD_TIME = 1.6;
+  var UP = new THREE.Vector3(0, 1, 0);
+  function updateArrow(t) {
+    var cycle = ARROW_DRAW_TIME + ARROW_HOLD_TIME;
+    var progress = Math.min((t % cycle) / ARROW_DRAW_TIME, 1);
+    var eased = 1 - Math.pow(1 - progress, 2);
+
+    var n = Math.max(2, Math.floor(ARROW_SAMPLES * eased));
     var pts = [];
-    for (var i = 0; i < WAVE_POINTS; i++) {
-      var x = -WAVE_W / 2 + (i / (WAVE_POINTS - 1)) * WAVE_W;
-      var y = Math.sin(i * 0.9 + t * 1.6) * 0.18 + Math.sin(i * 0.35 - t * 0.8) * 0.11;
-      pts.push(new THREE.Vector3(x, y, 0));
-    }
-    return pts;
-  }
-  var waveMat = new THREE.MeshPhysicalMaterial({ color: PEACH, roughness: 0.25, metalness: 0.1, emissive: 0x4a1210, emissiveIntensity: 0.3 });
-  var waveMesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(wavePoints(0)), 64, 0.028, 8, false), waveMat);
-  waveMesh.position.set(0, 0.05, 0.12);
-  card3.add(waveMesh);
-  function updateWave(t) {
-    var newGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(wavePoints(t)), 64, 0.028, 8, false);
-    waveMesh.geometry.dispose();
-    waveMesh.geometry = newGeo;
+    for (var i = 0; i <= n; i++) pts.push(arrowCurve.getPoint(i / ARROW_SAMPLES));
+    arrowMesh.geometry.dispose();
+    arrowMesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), Math.max(8, n * 2), 0.026, 8, false);
+
+    var tipT = Math.min(eased, 0.999);
+    var tipPos = arrowCurve.getPoint(tipT);
+    var tangent = arrowCurve.getTangent(tipT).normalize();
+    arrowHead.position.copy(tipPos);
+    arrowHead.quaternion.setFromUnitVectors(UP, tangent);
+    arrowHeadGlow.position.copy(tipPos);
+
+    arrowMat.emissiveIntensity = 0.7 + Math.sin(t * 1.1) * 0.2;
   }
 
-  var totalTex = labelTexture([
-    { text: '$2,480', size: 30, weight: '700', y: 40 },
-    { text: '4 PAYMENTS OF $620', size: 13, weight: '600', y: 78, alpha: 0.55, tracking: 0.6 }
-  ], '#001C44');
-  var totalPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 0.42), new THREE.MeshBasicMaterial({ map: totalTex, transparent: true }));
-  totalPlane.position.set(-0.15, -0.95, 0.095);
-  card3.add(totalPlane);
+  function pulseGrowthGlow(t) {
+    growthBars.forEach(function (b) {
+      b.mat.emissiveIntensity = 0.65 + Math.sin(t * 0.7 + b.phase) * 0.2;
+    });
+    updateArrow(t);
+  }
+
 
   card3.position.set(1.15, 0.28, 0.95);
   card3.rotation.set(-0.05, -0.22, 0.015);
@@ -623,8 +663,11 @@
   var contentCenter = new THREE.Vector3();
   contentBox.getSize(contentSize);
   contentBox.getCenter(contentCenter);
-  var FIT_MARGIN = 1.04;
-  var ZOOM = 1 / 1.2; // ~20% bigger on screen than a plain edge-to-edge fit
+  var FIT_MARGIN = 1.18; // buffer sized for the idle sway plus the user's own drag-rotation tilt
+  var ZOOM = 1; // plain edge-to-edge fit — content stays fully inside the canvas
+  // "Bigger, shifted left" is applied as a CSS transform on the canvas
+  // (see .scene-stage canvas) instead of panning/zooming the camera here —
+  // that keeps this fit's safety margin exact regardless of display size.
 
   function resize() {
     var w = stage.clientWidth, h = stage.clientHeight;
@@ -647,6 +690,44 @@
   window.addEventListener('resize', resize);
   resize();
 
+  // ---------- drag to rotate: lets the viewer spin the card group to see
+  // the cards' edges/depth, like the product wheel on Commercial ----------
+  var dragRotation = { x: 0, y: 0 };
+  var dragVelocity = { x: 0, y: 0 };
+  var dragState = null;
+  var DRAG_SPEED = 0.007;
+  var DRAG_TILT_MAX = 0.4;
+  var DRAG_DECAY = 0.94;
+
+  function onPointerDown(evt) {
+    if (evt.button !== undefined && evt.button !== 0) return;
+    canvas.setPointerCapture(evt.pointerId);
+    dragState = { pointerId: evt.pointerId, lastX: evt.clientX, lastY: evt.clientY };
+    canvas.style.cursor = 'grabbing';
+    evt.preventDefault();
+  }
+  function onPointerMove(evt) {
+    if (!dragState || evt.pointerId !== dragState.pointerId) return;
+    var dx = evt.clientX - dragState.lastX;
+    var dy = evt.clientY - dragState.lastY;
+    dragRotation.y += dx * DRAG_SPEED;
+    dragRotation.x = THREE.MathUtils.clamp(dragRotation.x + dy * DRAG_SPEED, -DRAG_TILT_MAX, DRAG_TILT_MAX);
+    dragVelocity.y = dx * DRAG_SPEED;
+    dragVelocity.x = dy * DRAG_SPEED;
+    dragState.lastX = evt.clientX;
+    dragState.lastY = evt.clientY;
+    evt.preventDefault();
+  }
+  function onPointerUp(evt) {
+    if (!dragState || evt.pointerId !== dragState.pointerId) return;
+    dragState = null;
+    canvas.style.cursor = 'grab';
+  }
+  canvas.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+
   // ---------- animate ----------
   var clock = new THREE.Clock();
   var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -656,14 +737,22 @@
     var t = clock.getElapsedTime();
 
     if (!prefersReduced) {
-      world.rotation.y = 0.06 + Math.sin(t * 0.3) * 0.05;
-      world.position.y = Math.sin(t * 0.55) * 0.07;
+      if (!dragState) {
+        dragRotation.y += dragVelocity.y;
+        dragRotation.x = THREE.MathUtils.clamp(dragRotation.x + dragVelocity.x, -DRAG_TILT_MAX, DRAG_TILT_MAX);
+        dragVelocity.x *= DRAG_DECAY;
+        dragVelocity.y *= DRAG_DECAY;
+      }
+      world.rotation.y = 0.06 + Math.sin(t * 0.17) * 0.05 + dragRotation.y;
+      world.rotation.x = dragRotation.x;
+      world.position.y = Math.sin(t * 0.3) * 0.07;
 
       bars.forEach(function (b) {
-        b.mesh.scale.y = b.base + Math.abs(Math.sin(t * 1.1 + b.phase)) * b.amp;
+        b.mesh.scale.y = b.base + Math.abs(Math.sin(t * 0.6 + b.phase)) * b.amp;
       });
 
-      updateWave(t);
+      pulseGrowthGlow(t);
+      updateRing(t);
     }
 
     renderer.render(scene, camera);
