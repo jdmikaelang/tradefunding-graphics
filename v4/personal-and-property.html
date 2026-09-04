@@ -437,7 +437,7 @@
       parallaxEase: 0.06
     },
     BUILD: {
-      buildDuration: 5.0,
+      buildDuration: 7.5,
       partSpan: 0.34,
       drawFraction: 0.55
     },
@@ -515,11 +515,11 @@
 
   /* Each part is first traced as a glowing outline (like a pen sketching
      its edges), then solidifies into the glass fill once fully traced. */
-  function registerPart(mesh){
+  function registerPart(mesh, lineColorHex){
     const edges = new THREE.EdgesGeometry(mesh.geometry);
     edges.setDrawRange(0, 0);
     const lineMat = new THREE.LineBasicMaterial({
-      color: CONFIG.LINE.color, transparent: true, opacity: 0
+      color: lineColorHex !== undefined ? lineColorHex : CONFIG.LINE.color, transparent: true, opacity: 0
     });
     const line = new THREE.LineSegments(edges, lineMat);
     mesh.add(line);
@@ -636,7 +636,10 @@
     );
     cone.position.y = t.trunkHeight + t.coneHeight / 2 - 0.03;
     group.add(cone);
-    registerPart(cone);
+    // Sketched in its own accent instead of the universal skyblue line, so
+    // the fill colour is foreshadowed by the drawing rather than appearing
+    // to switch hue the moment it solidifies.
+    registerPart(cone, colorHex);
 
     return group;
   }
